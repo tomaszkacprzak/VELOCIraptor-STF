@@ -147,5 +147,8 @@ These can be passed to ``cmake``
     * Produce SWIFTSIM compatible library (executable still produced but does simply returns warning)
         | ``VR_USE_SWIFT_INTERFACE=ON``
         | ``CMAKE_CXX_FLAGS=-fPIC``
+    * Produce PKDGRAV3 compatible library (executable still produced but does simply returns warning)
+        | ``VR_USE_PKDGRAV3_INTERFACE=ON``
+        | ``CMAKE_CXX_FLAGS=-fPIC``
     * Enable debugging
         ``DEBUG=ON``
