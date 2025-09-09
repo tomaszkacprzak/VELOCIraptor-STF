@@ -90,6 +90,13 @@ in the **swiftsim** `documentation <http://icc.dur.ac.uk/swift/docs/index.html>`
 The key is that the **swiftsim** code's configuration file  lists the |vr| configuration file
 used to run |vr|.
 
+Running within pkdgrav3
+-----------------------
+
+An analogous interface exists for the PkdGrav3 code via ``pkdgrav3interface.cxx``.
+At this stage the functions merely print greeting messages, providing a skeleton
+for future development.
+
 .. _briefoutput:
 
 Output
