@@ -38,6 +38,7 @@ set(VR_SOURCES
     ramsesio.cxx
     search.cxx
     swiftinterface.cxx
+    pkdgrav3interface.cxx
     substructureproperties.cxx
     tipsyio.cxx
     ui.cxx
