@@ -201,10 +201,15 @@ vr_option_defines(ZOOM_SIM                  HIGHRES)
 vr_option_defines(USE_LARGE_KDTREE          LARGETREE)
 
 vr_option_defines(USE_SWIFT_INTERFACE       SWIFTINTERFACE)
+vr_option_defines(USE_PKDGRAV3_INTERFACE    PKDGRAV3INTERFACE)
 vr_option_defines(LOG_SOURCE_LOCATION       VR_LOG_SOURCE_LOCATION)
 
 if (VR_USE_SWIFT_INTERFACE)
         list(APPEND VR_INCLUDE_DIRS ${SWIFT_INCLUDE_DIR})
+endif()
+
+if (VR_USE_PKDGRAV3_INTERFACE)
+        list(APPEND VR_INCLUDE_DIRS ${PKDGRAV3_INCLUDE_DIR})
 endif()
 
 

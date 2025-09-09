@@ -106,8 +106,8 @@ int run(int argc,char **argv)
 
     show_version_info(argc, argv);
 
-#ifdef SWIFTINTERFACE
-    cout<<"Built with SWIFT interface enabled when running standalone VELOCIraptor. Should only be enabled when running VELOCIraptor as a library from SWIFT. Exiting..."<<endl;
+#if defined(SWIFTINTERFACE) || defined(PKDGRAV3INTERFACE)
+    cout<<"Built with interface enabled when running standalone VELOCIraptor. Should only be enabled when running VELOCIraptor as a library. Exiting..."<<endl;
     exit(0);
 #endif
 
