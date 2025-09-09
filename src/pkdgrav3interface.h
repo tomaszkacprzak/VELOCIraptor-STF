@@ -94,6 +94,10 @@ struct pkdgrav3_vel_part;
 
 using namespace Pkdgrav3;
 
+///global libvelociraptorOptions structure that is used when calling library velociraptor from pkdgrav3
+extern Options libvelociraptorOpt;
+extern Options libvelociraptorOptbackup;
+
 extern "C" int InitVelociraptor(char* configname, Pkdgrav3::unitinfo, Pkdgrav3::siminfo, const int numthreads);
 extern "C" Pkdgrav3::vr_return_data InvokeVelociraptor(const int snapnum, char* outputname,
     Pkdgrav3::cosmoinfo, Pkdgrav3::siminfo,
