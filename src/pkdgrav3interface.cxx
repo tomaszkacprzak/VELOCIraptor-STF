@@ -6,6 +6,22 @@
 
 #ifdef PKDGRAV3INTERFACE
 
+Options libvelociraptorOpt;
+Options libvelociraptorOptbackup;
+
+/// \defgroup PKDGRAV3CONFIGERRORS Errors for pkdgrav3
+//@{
+#define PKDGRAV3CONFIGOPTMISSING 8
+#define PKDGRAV3CONFIGOPTERROR 9
+#define PKDGRAV3CONFIGOPTCONFLICT 10
+//@}
+
+inline int ConfigCheckPkdgrav3(Options &opt, Pkdgrav3::siminfo &s)
+{
+    std::cout << "hello world from config ConfigCheckPkdgrav3" << std::endl;
+    return 1;
+}
+
 int InitVelociraptor(char* configname, unitinfo u, siminfo s, const int numthreads)
 {
     std::cout << "hello world from velociraptor: InitVelociraptor" << std::endl;
