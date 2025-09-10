@@ -460,7 +460,7 @@ if (opt.iextragasoutput) {
         }
     }
 #endif
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
     /*writing M_gas_highT and other related quantities*/
     val=M_gas_highT;
     Fout.write((char*)&val,sizeof(val));
@@ -686,7 +686,7 @@ if (opt.iextragasoutput) {
         for (auto j=0;j<opt.aperturenum;j++) {
             Fout.write((char*)&aperture_Z_star[j],sizeof(val));
         }
-	#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+	#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
         for (auto j=0;j<opt.aperturenum;j++) {
             Fout.write((char*)&aperture_M_gas_highT[j],sizeof(val));
         }
@@ -1126,7 +1126,7 @@ if (opt.iextragasoutput) {
     }
 
 #endif
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
     Fout<<M_gas_highT<<" ";
     Fout<<Temp_mean_gas_highT<<" ";
     Fout<<Z_mean_gas_highT<<" ";
@@ -1320,7 +1320,7 @@ if (opt.iextragasoutput) {
         for (auto j=0;j<opt.aperturenum;j++) {
             Fout<<aperture_Z_star[j]<<" ";
         }
-        #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+        #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
         for (auto j=0;j<opt.aperturenum;j++) {
             Fout<<aperture_M_gas_highT[j]<<" ";
         }
@@ -1881,7 +1881,7 @@ void PropDataHeader::declare_all_datasets(const Options &opt)
     }
 #endif // defined(GASON) && defined(STARON)
 
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
     declare_dataset("Mass_gas_highT_excl", MASS);
     declare_dataset("T_gas_highT_excl", TEMPERATURE);
     declare_dataset("Zmet_gas_highT_excl");
@@ -1916,7 +1916,7 @@ void PropDataHeader::declare_all_datasets(const Options &opt)
             declare_dataset(name.str());
         }
     }
-#endif // (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#endif // (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
 
     declare_dataset("Mass_tot_incl", MASS);
 
@@ -2033,11 +2033,11 @@ void PropDataHeader::declare_all_datasets(const Options &opt)
         declare_aperture_datasets("Zmet_gas_sf");
         declare_aperture_datasets("Zmet_gas_nsf");
         declare_aperture_datasets("Zmet_star");
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
         declare_aperture_datasets("mass_highT", MASS);
         declare_aperture_datasets("T_highT", TEMPERATURE);
         declare_aperture_datasets("Zmet_highT");
-#endif // (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#endif // (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
 #endif // defined(GASON) && defined(STARON)
 
         //add extra property data in apertures

@@ -91,18 +91,22 @@ namespace Pkdgrav3 {
 }
 
 struct pkdgrav3_vel_part;
-
-using namespace Pkdgrav3;
-
 extern Options libvelociraptorOpt;
-int InitVelociraptor(Options &opt, const char* configname, unitinfo u, siminfo s, const int numthreads);
-extern "C" int InitVelociraptor(const char* configname, unitinfo u, siminfo s, const int numthreads);
-extern "C" vr_return_data InvokeVelociraptor(const int snapnum, char* outputname,
-    cosmoinfo c, siminfo s,
-    const size_t num_gravity_parts, const size_t num_hydro_parts, const size_t num_star_parts,
+int InitVelociraptor(Options &opt, const char* configname,
+                     Pkdgrav3::unitinfo u, Pkdgrav3::siminfo s,
+                     const int numthreads);
+extern "C" int InitVelociraptor(const char* configname,
+                                 Pkdgrav3::unitinfo u, Pkdgrav3::siminfo s,
+                                 const int numthreads);
+extern "C" Pkdgrav3::vr_return_data InvokeVelociraptor(
+    const int snapnum, char* outputname, Pkdgrav3::cosmoinfo c,
+    Pkdgrav3::siminfo s, const size_t num_gravity_parts,
+    const size_t num_hydro_parts, const size_t num_star_parts,
     struct pkdgrav3_vel_part *pkdgrav_parts, int *cell_node_ids,
-    const int numthreads, const int ireturngroupinfoflag, const int ireturnmostbound);
-void SetVelociraptorSimulationState(cosmoinfo c, siminfo s);
+    const int numthreads, const int ireturngroupinfoflag,
+    const int ireturnmostbound);
+void SetVelociraptorSimulationState(Pkdgrav3::cosmoinfo c,
+                                    Pkdgrav3::siminfo s);
 #endif
 
 #endif
