@@ -95,8 +95,8 @@ struct pkdgrav3_vel_part;
 using namespace Pkdgrav3;
 
 extern Options libvelociraptorOpt;
-int InitVelociraptor(Options &opt, char* configname, unitinfo u, siminfo s, const int numthreads);
-extern "C" int InitVelociraptor(char* configname, unitinfo u, siminfo s, const int numthreads);
+int InitVelociraptor(Options &opt, const char* configname, unitinfo u, siminfo s, const int numthreads);
+extern "C" int InitVelociraptor(const char* configname, unitinfo u, siminfo s, const int numthreads);
 extern "C" vr_return_data InvokeVelociraptor(const int snapnum, char* outputname,
     cosmoinfo c, siminfo s,
     const size_t num_gravity_parts, const size_t num_hydro_parts, const size_t num_star_parts,

@@ -82,7 +82,7 @@ inline bool CheckSwiftPartType(int type)
 }
 
 
-int InitVelociraptor(Options &opt, char* configname, unitinfo u, siminfo s, const int numthreads)
+int InitVelociraptor(Options &opt, const char* configname, unitinfo u, siminfo s, const int numthreads)
 {
     // if mpi invokved, init the velociraptor tasks and openmp threads
 #ifdef USEMPI
@@ -110,7 +110,7 @@ int InitVelociraptor(Options &opt, char* configname, unitinfo u, siminfo s, cons
 
     int iconfigflag;
     ///read the parameter file
-    opt.pname = configname;
+    opt.pname = const_cast<char*>(configname);
     LOG_RANK0(info) << "Initialising VELOCIraptor git revision " << velociraptor::git_sha1();
     LOG_RANK0(info) << "Reading VELOCIraptor config file...";
     GetParamFile(opt);
@@ -170,12 +170,12 @@ int InitVelociraptor(Options &opt, char* configname, unitinfo u, siminfo s, cons
 
 }
 
-int InitVelociraptor(char* configname, unitinfo u, siminfo s, const int numthreads)
+int InitVelociraptor(const char* configname, unitinfo u, siminfo s, const int numthreads)
 {
 	return InitVelociraptor(libvelociraptorOpt, configname, u, s, numthreads);
 }
 
-int InitVelociraptorExtra(const int iextra, char* configname, unitinfo u, siminfo s, const int numthreads)
+int InitVelociraptorExtra(const int iextra, const char* configname, unitinfo u, siminfo s, const int numthreads)
 {
 	return InitVelociraptor(libvelociraptorOptextra[iextra], configname, u, s, numthreads);
 }

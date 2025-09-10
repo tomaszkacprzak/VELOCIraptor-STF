@@ -144,11 +144,11 @@ using namespace Swift;
 
 ///\defgroup external C style interfaces that can be called in swift N-body code.
 //@{
-//extern "C" int InitVelociraptor(char* configname, char* outputname, Swift::cosmoinfo, Swift::unitinfo, Swift::siminfo, const int numthreads);
+//extern "C" int InitVelociraptor(const char* configname, char* outputname, Swift::cosmoinfo, Swift::unitinfo, Swift::siminfo, const int numthreads);
 ///initialize velociraptor, check configuration options,
-extern "C" int InitVelociraptor(char* configname, Swift::unitinfo, Swift::siminfo, const int numthreads);
+extern "C" int InitVelociraptor(const char* configname, Swift::unitinfo, Swift::siminfo, const int numthreads);
 ///initialize velociraptor based on extra possible outputs requested by swift in addition to standard invocation, check configuration options,
-extern "C" int InitVelociraptorExtra(const int iextra, char* configname, Swift::unitinfo, Swift::siminfo, const int numthreads);
+extern "C" int InitVelociraptorExtra(const int iextra, const char* configname, Swift::unitinfo, Swift::siminfo, const int numthreads);
 ///actually run velociraptor
 extern "C" Swift::vr_return_data InvokeVelociraptor(const int snapnum, char* outputname,
     Swift::cosmoinfo, Swift::siminfo,
