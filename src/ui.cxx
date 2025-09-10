@@ -737,9 +737,11 @@ inline vector<string> StripIndexOffName(
 ///\todo still more parameters that can be adjusted
 void GetParamFile(Options &opt)
 {
+
 #ifndef USEMPI
     int ThisTask =0, NProcs =1;
 #endif
+
     string line,sep="=";
     string tag,val;
     char buff[1024],*pbuff,tbuff[1024],vbuff[1024];
@@ -756,6 +758,9 @@ void GetParamFile(Options &opt)
 #else
             exit(9);
 #endif
+    } else {
+        if (ThisTask==0)
+            LOG(error) << "Config file: " << opt.pname << " found";
     }
     paramfile.open(opt.pname, ios::in);
     std::string::size_type j;
@@ -786,7 +791,7 @@ void GetParamFile(Options &opt)
                 }
             }
         }
-#ifndef SWIFTINTERFACE
+#if !defined(SWIFTINTERFACE) && !defined(PKDGRAV3INTERFACE)
         if (opt.outname==NULL) {
             if (ThisTask==0)
                 cerr<<"No output name given, terminating"<<endl;
@@ -799,12 +804,14 @@ void GetParamFile(Options &opt)
     }
     //sprintf(fname,"%s.cfg",opt.outname);
     //cfgfile.open(fname, ios::out);
+    LOG_RANK0(info) << "Reading config";
     paramfile.clear();
     paramfile.seekg(0, ios::beg);
     if (paramfile.is_open())
     {
         while (paramfile.good()){
             getline(paramfile,line);
+            fprintf(stdout, "Reading config line: %s\n", line.c_str());
             //if line is not commented out or empty
             if (line[0]!='#'&&line.length()!=0) {
                 j = line.find(sep);
@@ -1903,7 +1910,9 @@ void GetParamFile(Options &opt)
         paramfile.close();
         //cfgfile.close();
     }
+    LOG_RANK0(info) << "Finished reading config file: " << opt.pname;
     configure_logging(opt);
+    LOG_RANK0(info) << "Finished configuring logging";
 }
 
 void NOMASSCheck(Options &opt)

@@ -19,7 +19,7 @@ Options libvelociraptorOpt;
 //@}
 
 ///check configuration options with pkdgrav3
-inline int ConfigCheckPkdgrav3(Options &opt, Pkdgrav3::siminfo &s)
+inline int ConfigCheckPkdgrav3(Options &opt, Pkdgrav3::allinfo &pkdgrav3_info)
 {
     if (opt.iBaryonSearch && !(opt.partsearchtype==PSTALL || opt.partsearchtype==PSTDARK)) {
         LOG_RANK0(error) << "Conflict in config file: both gas/star/etc particle type search AND the separate baryonic (gas,star,etc) search flag are on. Check config";
@@ -31,19 +31,19 @@ inline int ConfigCheckPkdgrav3(Options &opt, Pkdgrav3::siminfo &s)
     }
     if (opt.HaloMinSize==-1) opt.HaloMinSize=opt.MinSize;
 
-    if (s.idarkmatter == false && opt.partsearchtype==PSTDARK) {
+    if (pkdgrav3_info.idarkmatter == false && opt.partsearchtype==PSTDARK) {
         LOG_RANK0(error) << "Conflict in config file: simulation contains no dark matter but searching only dark matter. This is incompatible. Check config";
         return PKDGRAV3CONFIGOPTCONFLICT;
     }
-    if (s.idarkmatter == false && opt.partsearchtype==PSTALL && opt.iBaryonSearch) {
+    if (pkdgrav3_info.idarkmatter == false && opt.partsearchtype==PSTALL && opt.iBaryonSearch) {
         LOG_RANK0(error) << "Conflict in config file: simulation contains no dark matter but using dark matter to define links when searching all particles . This is incompatible. Check config";
         return PKDGRAV3CONFIGOPTCONFLICT;
     }
-    if (s.igas == false && opt.partsearchtype==PSTGAS) {
+    if (pkdgrav3_info.igas == false && opt.partsearchtype==PSTGAS) {
         LOG_RANK0(error) << "Conflict in config file: simulation contains no gas but searching only gas. This is incompatible. Check config";
         return PKDGRAV3CONFIGOPTCONFLICT;
     }
-    if ((s.istar == false && opt.partsearchtype==PSTSTAR)) {
+    if ((pkdgrav3_info.istar == false && opt.partsearchtype==PSTSTAR)) {
         LOG_RANK0(error) << "Conflict in config file: simulation contains no gas but searching only stars or using stars as basis for links. This is incompatible. Check config";
         return PKDGRAV3CONFIGOPTCONFLICT;
     }
@@ -67,7 +67,7 @@ inline int ConfigCheckPkdgrav3(Options &opt, Pkdgrav3::siminfo &s)
     return 1;
 }
 
-int InitVelociraptor(Options &opt, const char* configname, unitinfo u, siminfo s, const int numthreads)
+int InitVelociraptor(const char* configname, allinfo pkdgrav3_info, const int numthreads)
 {
     // if mpi invoked, init the velociraptor tasks and openmp threads
 #ifdef USEMPI
@@ -89,25 +89,28 @@ int InitVelociraptor(Options &opt, const char* configname, unitinfo u, siminfo s
     vr::init_logging(vr::LogLevel::trace);
     gsl_set_error_handler_off();
 
+    // Create options object
+    Options opt;
+
     int iconfigflag;
     ///read the parameter file
     opt.pname = const_cast<char*>(configname);
     LOG_RANK0(info) << "Initialising VELOCIraptor git revision " << velociraptor::git_sha1();
-    LOG_RANK0(info) << "Reading VELOCIraptor config file...";
+    LOG_RANK0(info) << "Reading VELOCIraptor config file...       " << opt.pname;
     GetParamFile(opt);
     //on the fly finding and using pkdgrav3's mesh mpi decomposition
     opt.iontheflyfinding = true;
     opt.impiusemesh = true;
     ///check configuration
-    iconfigflag = ConfigCheckPkdgrav3(opt, s);
+    iconfigflag = ConfigCheckPkdgrav3(opt, pkdgrav3_info);
     if (iconfigflag != 1) return iconfigflag;
 
     LOG_RANK0(info) << "Setting cosmology, units, sim stuff";
     ///set units, here idea is to convert internal units so that have kpc, km/s, solar mass
     ///\todo switch this so run in reasonable pkdgrav3 units and store conversion
-    opt.lengthtokpc=u.lengthtokpc;
-    opt.velocitytokms=u.velocitytokms;
-    opt.masstosolarmass=u.masstosolarmass;
+    opt.lengthtokpc=pkdgrav3_info.lengthtokpc;
+    opt.velocitytokms=pkdgrav3_info.velocitytokms;
+    opt.masstosolarmass=pkdgrav3_info.masstosolarmass;
 
     //run in pkdgrav3 internal units, don't convert units
     opt.lengthinputconversion=1.0;
@@ -120,16 +123,16 @@ int InitVelociraptor(Options &opt, const char* configname, unitinfo u, siminfo s
 
     //set cosmological parameters that do not change
     ///these should be in units of kpc, km/s, and solar mass
-    opt.G=u.gravity;
-    opt.H=u.hubbleunit;
+    opt.G=pkdgrav3_info.gravity;
+    opt.H=pkdgrav3_info.hubbleunit;
 
     //set if cosmological
-    opt.icosmologicalin = s.icosmologicalsim;
+    opt.icosmologicalin = pkdgrav3_info.icosmologicalsim;
 
     //store a general mass unit, useful if running uniform box with single mass
     //and saving memory by not storing mass per particle.
 #ifdef NOMASS
-    opt.MassValue = s.mass_uniform_box;
+    opt.MassValue = pkdgrav3_info.mass_uniform_box;
     NOMASSCheck(opt);
 #endif
 
@@ -151,23 +154,17 @@ int InitVelociraptor(Options &opt, const char* configname, unitinfo u, siminfo s
 
 }
 
-int InitVelociraptor(const char* configname, unitinfo u, siminfo s, const int numthreads)
-{
-    return InitVelociraptor(libvelociraptorOpt, configname, u, s, numthreads);
-}
 
-vr_return_data InvokeVelociraptor(const int snapnum, char* outputname,
-    cosmoinfo c, siminfo s,
+void InvokeVelociraptor(const int snapnum, char* outputname,
+    allinfo pkdgrav3_info,
     const size_t num_gravity_parts, const size_t num_hydro_parts, const size_t num_star_parts,
-    struct pkdgrav3_vel_part *pkdgrav_parts, int *cell_node_ids,
+    struct pkdgrav3_vel_part *pkdgrav_parts,
     const int numthreads, const int ireturngroupinfoflag, const int ireturnmostbound)
 {
     std::cout << "hello world from velociraptor: InvokeVelociraptor" << std::endl;
-    vr_return_data data{};
-    return data;
 }
 
-void SetVelociraptorSimulationState(cosmoinfo c, siminfo s)
+void SetVelociraptorSimulationState(allinfo pkdgrav3_info)
 {
     std::cout << "hello world from velociraptor: SetVelociraptorSimulationState" << std::endl;
 }
