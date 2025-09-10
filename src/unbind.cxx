@@ -795,7 +795,7 @@ int Unbind(Options &opt, Particle **gPart, Int_t &numgroups, Int_t *numingroup, 
         if (opt.uinfo.icalculatepotential) {
             for (j=0;j<numingroup[i];j++) gPart[i][j].SetPotential(0);
         }
-        #ifdef SWIFTINTERFACE
+        #if defined(SWIFTINTERFACE) || defined(PKDGRAV3INTERFACE)
         else {
             for (j=0;j<numingroup[i];j++) gPart[i][j].SetPotential(gPart[i][j].GetGravityPotential());
         }

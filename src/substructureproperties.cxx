@@ -624,7 +624,7 @@ private(EncMassSF,EncMassNSF,Krot_sf,Krot_nsf,Ekin_sf,Ekin_nsf)
                     pdata[i].Z_gas_nsf+=Pval->GetZmet();
                     pdata[i].Z_mean_gas_nsf+=mval*Pval->GetZmet();
                 }
-        		#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+        		#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
                 if(j == 0 & opt.iverbose>1){
                     LOG(debug) << "Gas temperature of particle 1 in this object " << temp << " for gas and threshold " << opt.temp_max_cut;
                 }
@@ -696,7 +696,7 @@ private(EncMassSF,EncMassNSF,Krot_sf,Krot_nsf,Ekin_sf,Ekin_nsf)
             }
 #endif
         }
-	#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+	#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
 	if(pdata[i].M_gas_highT>0){
 	    pdata[i].Temp_mean_gas_highT/=pdata[i].M_gas_highT;
 	    pdata[i].Z_mean_gas_highT/=pdata[i].M_gas_highT;
@@ -1451,7 +1451,7 @@ private(j,Pval,mval,x,y,z,vx,vy,vz,jval,jzval,zdist,Rdist)
                 if (SFR>opt.gas_sfr_threshold) pdata[i].M_gas_sf+=mval;
                 else pdata[i].M_gas_nsf+=mval;
                 #endif
-                #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+                #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
                 auto temp = Pval->GetTemperature();
                 if (temp > opt.temp_max_cut && SFR <= 0) {
                     pdata[i].M_gas_highT+=mval;
@@ -1538,7 +1538,7 @@ private(j,Pval,x,y,z,vx,vy,vz,J,mval,SFR)
                     sigV_gas_nsf+=(vx*vx+vy*vy*vz*vz)*mval;
                 }
 
-                #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+                #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
                 /*select hot gas particles and add up their mass and compute mass-weighted quantities*/
                 if (temp > opt.temp_max_cut && SFR <= 0) {
                     Tsum_hot+=mval*temp;
@@ -1574,7 +1574,7 @@ private(j,Pval,x,y,z,vx,vy,vz,J,mval,SFR)
         pdata[i].Z_gas_nsf=Zsum_nsf;
         pdata[i].Z_mean_gas_nsf=Zmeansum_nsf;
 #endif
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
         pdata[i].Temp_mean_gas_highT=Tsum_hot;
         pdata[i].Z_mean_gas_highT=Zsum_hot;
 #endif
@@ -1614,7 +1614,7 @@ private(j,Pval,x,y,z,vx,vy,vz,J,mval,SFR)
             }
 #endif
         }
-        #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+        #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
         if(pdata[i].M_gas_highT>0){
             pdata[i].Temp_mean_gas_highT/=pdata[i].M_gas_highT;
             pdata[i].Z_mean_gas_highT/=pdata[i].M_gas_highT;
@@ -3091,7 +3091,7 @@ private(i,j,k)
 		      pdata[i].M_gas_nsf_incl += massval;
 		   }
 #endif // STARON
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
 		   auto temp = Pval->GetTemperature();
                    /*select hot gas particles and add up their mass and compute mass-weighted quantities*/
                    if (temp > opt.temp_max_cut && sfr <= 0) {
@@ -3114,7 +3114,7 @@ private(i,j,k)
 #ifdef NOMASS
         pdata[i].gMFOF*=opt.MassValue;
 #endif
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
 	if(pdata[i].M_gas_highT_incl > 0){
 		pdata[i].Temp_mean_gas_highT_incl /= pdata[i].M_gas_highT_incl;
 		pdata[i].Z_mean_gas_highT_incl /= pdata[i].M_gas_highT_incl;
@@ -3157,7 +3157,7 @@ void GetFOFMass(Options &opt, Int_t ngroup, Int_t *&numingroup, PropData *&pdata
 #ifdef STARON
 	    pdata[hostindex].M_star_incl += pdata[i].M_star;
 #endif
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
 	    pdata[hostindex].M_gas_highT_incl += pdata[i].M_gas_highT;
 	    pdata[hostindex].Temp_mean_gas_highT_incl += pdata[i].Temp_mean_gas_highT * pdata[i].M_gas_highT;
 	    pdata[hostindex].Z_mean_gas_highT_incl += pdata[i].Z_mean_gas_highT * pdata[i].M_gas_highT;
@@ -3177,7 +3177,7 @@ void GetFOFMass(Options &opt, Int_t ngroup, Int_t *&numingroup, PropData *&pdata
 #ifdef STARON
             pdata[i].M_star_incl += pdata[i].M_star;
 #endif
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
             pdata[i].M_gas_highT_incl += pdata[i].M_gas_highT;
             pdata[i].Temp_mean_gas_highT_incl += pdata[i].Temp_mean_gas_highT * pdata[i].M_gas_highT;
             pdata[i].Z_mean_gas_highT_incl += pdata[i].Z_mean_gas_highT * pdata[i].M_gas_highT;
@@ -3187,7 +3187,7 @@ void GetFOFMass(Options &opt, Int_t ngroup, Int_t *&numingroup, PropData *&pdata
 #ifdef NOMASS
     for (i=1;i<=ngroup;i++) pdata[i].gMFOF*=opt.MassValue;
 #endif
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
     for (i=1;i<=ngroup;i++) {
 	if(pdata[i].M_gas_highT_incl > 0){
 		pdata[i].Temp_mean_gas_highT_incl /= pdata[i].M_gas_highT_incl;
@@ -3235,7 +3235,7 @@ void GetSOMasses(Options &opt, const Int_t nbodies, Particle *Part, Int_t ngroup
         }
     }
 
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
     int sonum_hotgas = opt.aperture_hotgas_normalised_to_overdensity.size();
     auto iter = std::find(opt.SOthresholds_values_crit.begin(), opt.SOthresholds_values_crit.end(), opt.hot_gas_overdensity_normalisation);
     int SOthreshNorm;
@@ -3368,7 +3368,7 @@ private(i,j,k,taggedparts,radii,masses,indices,posref,posparts,velparts,typepart
     }
 #endif
 
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
         vector<Double_t> temp;
 #ifdef STARON
         vector<Double_t> sfr;
@@ -3399,7 +3399,7 @@ private(i,j,k,taggedparts,radii,masses,indices,posref,posparts,velparts,typepart
                 typeparts[j]=Part[taggedparts[j]].GetType();
             }
 #endif
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
            if (sonum_hotgas > 0 && typeparts[j] == GASTYPE) {
                temp[j] = Part[taggedparts[j]].GetTemperature();
 #ifdef STARON
@@ -3445,7 +3445,7 @@ private(i,j,k,taggedparts,radii,masses,indices,posref,posparts,velparts,typepart
                         typeparts.resize(typeparts.size()+taggedparts.size());
                     }
 #endif
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
                    if (sonum_hotgas > 0) {
                        temp.resize(typeparts.size()+taggedparts.size());
 #ifdef STARON
@@ -3471,7 +3471,7 @@ private(i,j,k,taggedparts,radii,masses,indices,posref,posparts,velparts,typepart
                             typeparts[offset+j]=PartDataGet[taggedparts[j]].GetType();
                         }
 #endif
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
                         if (sonum_hotgas > 0 && typeparts[offset+j] == GASTYPE) {
                             temp[offset+j] = PartDataGet[taggedparts[j]].GetTemperature();
 #ifdef STARON
@@ -3514,7 +3514,7 @@ private(i,j,k,taggedparts,radii,masses,indices,posref,posparts,velparts,typepart
         //calculate other extra SO related properties
         CalculateExtraSphericalOverdensityProperties(opt, pdata[i], 
         radii, masses, indices, posparts, velparts, 
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
         typeparts, sonum_hotgas, SOthreshNorm, temp, sfr, Zgas);
 #else
         typeparts);
@@ -4530,7 +4530,7 @@ private(i,j,k,storepid)
     }
 
     }//end of if calculate potential
-#ifdef SWIFTINTERFACE
+#if defined(SWIFTINTERFACE) || defined(PKDGRAV3INTERFACE)
     else {
         for (i=1;i<=ngroup;i++) for (j=0;j<numingroup[i];j++) Part[j+noffset[i]].SetPotential(Part[j+noffset[i]].GetGravityPotential());
     }
@@ -5374,7 +5374,7 @@ void CalculateApertureQuantities(Options &opt, Int_t &ning, Particle *Part, Prop
         float mass, mass_sf, mass_nsf;
 #if defined(GASON) && defined(STARON)
         float SFR, Zmet;
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
 	float temp;
 #endif
 #endif
@@ -5395,7 +5395,7 @@ void CalculateApertureQuantities(Options &opt, Int_t &ning, Particle *Part, Prop
 #if defined(GASON) && defined(STARON)
         SFR = Pval->GetSFR();
         Zmet = Pval->GetZmet()*mass;
-	#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+	#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
 	temp = Pval->GetTemperature();
 	#endif
 #endif
@@ -5424,7 +5424,7 @@ void CalculateApertureQuantities(Options &opt, Int_t &ning, Particle *Part, Prop
             if (EncMassGasNSF>0) pdata.aperture_veldisp_gas_nsf[iaptindex]=EncVelDispGasNSF/EncMassGasNSF;
             if (EncMassGasSF>0) pdata.aperture_vrdisp_gas_sf[iaptindex]=EncVRDispGasSF/EncMassGasSF;
             if (EncMassGasNSF>0) pdata.aperture_vrdisp_gas_nsf[iaptindex]=EncVRDispGasNSF/EncMassGasNSF;
-	    #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+	    #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
 	    pdata.aperture_M_gas_highT[iaptindex]=EncMassGasHot;
 	    if(EncMassGasHot>0){
 		   pdata.aperture_Temp_mean_gas_highT[iaptindex]=EncTGasHot/EncMassGasHot;
@@ -5519,7 +5519,7 @@ void CalculateApertureQuantities(Options &opt, Int_t &ning, Particle *Part, Prop
                 EncVRDispGasNSF += vrdisp;
                 EncZmetGasNSF += Zmet;
             }
-            #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+            #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
 	    // compute aperture quantities related to hot gas.
 	    if(temp > opt.temp_max_cut && SFR <= 0){
                EncMassGasHot += mass;
@@ -5613,7 +5613,7 @@ void CalculateApertureQuantities(Options &opt, Int_t &ning, Particle *Part, Prop
         if (EncMassGasNSF>0) pdata.aperture_veldisp_gas_nsf[j]=EncVelDispGasNSF/EncMassGasNSF;
         if (EncMassGasNSF>0) pdata.aperture_vrdisp_gas_nsf[j]=EncVRDispGasNSF/EncMassGasNSF;
         if (EncMassGasNSF>0) pdata.aperture_Z_gas_nsf[j]=EncZmetGasNSF/EncMassGasNSF;
-        #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+        #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
         pdata.aperture_M_gas_highT[j]=EncMassGasHot;
 	if(EncMassGasHot>0){
 	   pdata.aperture_Temp_mean_gas_highT[j]=EncTGasHot/EncMassGasHot;
@@ -7306,7 +7306,7 @@ void SetSphericalOverdensityMasstoTotalMassExclusive(Options &opt, PropData &pda
 void CalculateExtraSphericalOverdensityProperties(Options &opt, PropData &pdata,
     vector<Double_t> &radii, vector<Double_t> &masses, vector<Int_t> &indices,
     vector<Coordinate> &posparts, vector<Coordinate> &velparts, 
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
     vector<int> &typeparts, int sonum_hotgas, int SOthreshNorm, 
     vector<Double_t> &temp, vector<Double_t> &sfr, vector<Double_t> &Zgas)
 #else 
@@ -7317,7 +7317,7 @@ void CalculateExtraSphericalOverdensityProperties(Options &opt, PropData &pdata,
     if (!opt.iextrahalooutput) return;
 
 
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
     // define the radii in which we'll evaluate the mass of hot gas and relates quantities.
     vector<Double_t> SOlg_radii_highT(sonum_hotgas);
     std::transform(opt.aperture_hotgas_normalised_to_overdensity.begin(),
@@ -7412,7 +7412,7 @@ void CalculateExtraSphericalOverdensityProperties(Options &opt, PropData &pdata,
                     pdata.SO_mass_gas[iso]+=massval;
                     pdata.SO_angularmomentum_gas[iso]+=J;
                 }
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
                 if(sonum_hotgas > 0){
                     for (int r_ap = 0; r_ap < sonum_hotgas; r_ap++){
                         if(rc < SOlg_radii_highT[r_ap]){
@@ -7477,7 +7477,7 @@ void CalculateExtraSphericalOverdensityProperties(Options &opt, PropData &pdata,
 #endif
     }
 
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
     // normalize vectors by mass.
     if(pdata.M_gas_highT_incl)
     {

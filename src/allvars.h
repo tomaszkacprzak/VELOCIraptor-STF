@@ -788,11 +788,11 @@ struct Options
     vector<unsigned long long> cellnodenumparts;
 
     /// allowed mesh based mpi decomposition load imbalance
-#ifndef SWIFTINTERFACE
+#if !defined(SWIFTINTERFACE) && !defined(PKDGRAV3INTERFACE)
     float mpimeshimbalancelimit = 0.1;
 #else
     float mpimeshimbalancelimit = 0;
-#endif // SWIFTINTERFACE
+#endif // SWIFTINTERFACE || PKDGRAV3INTERFACE
 
     ///whether using mesh decomposition
     bool impiusemesh = true;
@@ -1535,7 +1535,7 @@ struct PropData
     vector<float> profile_mass_gas_nsf;
     vector<float> profile_mass_inclusive_gas_nsf;
     vector<Coordinate> profile_L_gas_nsf;
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
     vector<float> aperture_M_gas_highT;
     vector<float> aperture_Temp_mean_gas_highT;
     vector<float> aperture_Z_mean_gas_highT;
@@ -1547,7 +1547,7 @@ struct PropData
     vector<Coordinate> SO_angularmomentum_gas_nsf;
 #endif
 #endif
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
     Double_t M_gas_highT;
     Double_t Temp_mean_gas_highT;
     Double_t Z_mean_gas_highT;
@@ -1798,7 +1798,7 @@ struct PropData
         L_BN98_excl_gas_nsf[0]=L_BN98_excl_gas_nsf[1]=L_BN98_excl_gas_nsf[2]=0;
 #endif
 #endif
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
 	M_gas_highT=0;
 	Temp_mean_gas_highT=0;
 	Z_mean_gas_highT=0;
@@ -1857,7 +1857,7 @@ struct PropData
         AllocateApertures(opt);
         AllocateProfiles(opt);
         AllocateSOs(opt);
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
 	AllocateSOs_HotGas(opt);
 #endif
     }
@@ -1891,7 +1891,7 @@ struct PropData
             aperture_rhalfmass_gas_nsf.resize(opt.aperturenum);
             aperture_Z_gas_sf.resize(opt.aperturenum);
             aperture_Z_gas_nsf.resize(opt.aperturenum);
-            #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+            #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
 	    aperture_M_gas_highT.resize(opt.aperturenum);
 	    aperture_Temp_mean_gas_highT.resize(opt.aperturenum);
 	    aperture_Z_mean_gas_highT.resize(opt.aperturenum);
@@ -1953,7 +1953,7 @@ struct PropData
             for (auto &x:aperture_rhalfmass_gas_nsf) x=-1;
             for (auto &x:aperture_Z_gas_sf) x=0;
             for (auto &x:aperture_Z_gas_nsf) x=0;
-            #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+            #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
             for (auto &x:aperture_M_gas_highT) x=0;
             for (auto &x:aperture_Temp_mean_gas_highT) x=0;
             for (auto &x:aperture_Z_mean_gas_highT) x=0;
@@ -2128,7 +2128,7 @@ struct PropData
         }
     }
 
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
     void AllocateSOs_HotGas(Options &opt)
     {
         int sonum_hotgas = opt.aperture_hotgas_normalised_to_overdensity.size();
@@ -2287,7 +2287,7 @@ struct PropData
         #endif
 
 #endif
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
 	M_gas_highT*=opt.h;
 	M_gas_highT_incl*=opt.h;
         if(opt.aperture_hotgas_normalised_to_overdensity.size() > 0){

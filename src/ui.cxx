@@ -786,7 +786,7 @@ void GetParamFile(Options &opt)
                 }
             }
         }
-#ifndef SWIFTINTERFACE
+#if !defined(SWIFTINTERFACE) && !defined(PKDGRAV3INTERFACE)
         if (opt.outname==NULL) {
             if (ThisTask==0)
                 cerr<<"No output name given, terminating"<<endl;
@@ -2704,6 +2704,9 @@ ConfigInfo::ConfigInfo(Options &opt){
 #endif
 #ifdef SWIFTINTERFACE
     AddEntry("#SWIFTINTERFACE");
+#endif
+#ifdef PKDGRAV3INTERFACE
+    AddEntry("#PKDGRAV3INTERFACE");
 #endif
 
 }

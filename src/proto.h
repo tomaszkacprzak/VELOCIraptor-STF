@@ -440,7 +440,7 @@ void CalculateSphericalOverdensityExclusive(Options &opt, PropData &pdata,
 void CalculateExtraSphericalOverdensityProperties(Options &opt, PropData &pdata,
     vector<Double_t> &radii, vector<Double_t> &masses, vector<Int_t> &indices,
     vector<Coordinate> &posparts, vector<Coordinate> &velparts, 
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
     vector<int> &typeparts, int sonum_hotgas, int SOthreshNorm, 
     vector<Double_t> &temp, vector<Double_t> &sfr, vector<Double_t> &Zgas);
 #else

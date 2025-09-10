@@ -2335,7 +2335,7 @@ void WriteProperties(Options &opt, const Int_t ngroups, PropData *pdata){
         }
     }
 #endif
-#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+#if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
     /*writing M_gas_highT and related quantities*/
     for (Int_t i=0;i<ngroups;i++) ((Double_t*)data)[i]=pdata[i+1].M_gas_highT;
     Fhdf.write_dataset(opt, head.headerdatainfo[itemp],ng,data,head.hdfpredtypeinfo[itemp]);itemp++;
@@ -2628,7 +2628,7 @@ void WriteProperties(Options &opt, const Int_t ngroups, PropData *pdata){
                 Fhdf.write_dataset(opt, head.headerdatainfo[itemp],ng,data,head.hdfpredtypeinfo[itemp]);itemp++;
             }
 
-            #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE))
+            #if (defined(GASON)) || (defined(GASON) && defined(SWIFTINTERFACE)) || (defined(GASON) && defined(PKDGRAV3INTERFACE))
             for (auto j=0;j<opt.aperturenum;j++) {
                 for (Int_t i=0;i<ngroups;i++) ((Double_t*)data)[i]=pdata[i+1].aperture_M_gas_highT[j];
                 Fhdf.write_dataset(opt, head.headerdatainfo[itemp],ng,data,head.hdfpredtypeinfo[itemp]);itemp++;
