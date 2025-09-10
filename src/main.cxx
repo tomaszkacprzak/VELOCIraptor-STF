@@ -111,6 +111,12 @@ int run(int argc,char **argv)
     exit(0);
 #endif
 
+#ifdef PKDGRAV3INTERFACE
+    cout<<"Built with PKDGRAV3 interface enabled when running standalone VELOCIraptor. Should only be enabled when running VELOCIraptor as a library from PKDGRAV3. Exiting..."<<endl;
+    exit(0);
+#endif
+
+
     gsl_set_error_handler_off();
 
     Options opt;
