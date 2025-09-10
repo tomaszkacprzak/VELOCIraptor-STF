@@ -95,14 +95,14 @@ struct pkdgrav3_vel_part;
 using namespace Pkdgrav3;
 
 extern Options libvelociraptorOpt;
-
-extern "C" int InitVelociraptor(char* configname, Pkdgrav3::unitinfo, Pkdgrav3::siminfo, const int numthreads);
-extern "C" Pkdgrav3::vr_return_data InvokeVelociraptor(const int snapnum, char* outputname,
-    Pkdgrav3::cosmoinfo, Pkdgrav3::siminfo,
+int InitVelociraptor(Options &opt, char* configname, unitinfo u, siminfo s, const int numthreads);
+extern "C" int InitVelociraptor(char* configname, unitinfo u, siminfo s, const int numthreads);
+extern "C" vr_return_data InvokeVelociraptor(const int snapnum, char* outputname,
+    cosmoinfo c, siminfo s,
     const size_t num_gravity_parts, const size_t num_hydro_parts, const size_t num_star_parts,
     struct pkdgrav3_vel_part *pkdgrav_parts, int *cell_node_ids,
     const int numthreads, const int ireturngroupinfoflag, const int ireturnmostbound);
-void SetVelociraptorSimulationState(Pkdgrav3::cosmoinfo, Pkdgrav3::siminfo);
+void SetVelociraptorSimulationState(cosmoinfo c, siminfo s);
 #endif
 
 #endif
