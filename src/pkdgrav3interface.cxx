@@ -134,7 +134,7 @@ int InitVelociraptor(Options &opt, const char* configname, unitinfo u, siminfo s
 #endif
 
     //write velociraptor configuration info, appending .configuration to the input config file and writing every config option
-    opt.outname = configname;
+    opt.outname = const_cast<char*>(configname);
 
     //store list of names that
     WriteVELOCIraptorConfig(opt);
