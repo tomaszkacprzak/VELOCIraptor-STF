@@ -97,6 +97,12 @@ vr_option(USE_EXTRA_INPUT_INFO     "Store where particles are located in the inp
 vr_option(USE_EXTRA_FOF_INFO     "Store particles fof, group, SO ids" OFF)
 vr_option(USE_LARGE_KDTREE      "Require large mem KDTree as there are more than > max 32-bit integer entries" OFF)
 
+# Allow PKDGRAV3 interface flag without the VR_ prefix
+if (DEFINED PKDGRAV3INTERFACE AND NOT DEFINED VR_PKDGRAV3INTERFACE)
+    set(VR_PKDGRAV3INTERFACE ${PKDGRAV3INTERFACE} CACHE BOOL
+        "Used to compile the code with hooks for being called from the PKDGRAV3 N-body code" FORCE)
+endif()
+
 # VELOCiraptor behavior options
 vr_option(STRUCTURE_DEN "Calculate local density dist. only for particles in field objects; uses all particles to estimate quantity" ON)
 vr_option(HALO_DEN      "Like STRUCTURE_DEN, but se particles inside field objects" OFF)
