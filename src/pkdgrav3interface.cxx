@@ -67,7 +67,7 @@ inline int ConfigCheckPkdgrav3(Options &opt, Pkdgrav3::siminfo &s)
     return 1;
 }
 
-int InitVelociraptor(Options &opt, char* configname, unitinfo u, siminfo s, const int numthreads)
+int InitVelociraptor(Options &opt, const char* configname, unitinfo u, siminfo s, const int numthreads)
 {
     // if mpi invoked, init the velociraptor tasks and openmp threads
 #ifdef USEMPI
@@ -91,7 +91,7 @@ int InitVelociraptor(Options &opt, char* configname, unitinfo u, siminfo s, cons
 
     int iconfigflag;
     ///read the parameter file
-    opt.pname = configname;
+    opt.pname = const_cast<char*>(configname);
     LOG_RANK0(info) << "Initialising VELOCIraptor git revision " << velociraptor::git_sha1();
     LOG_RANK0(info) << "Reading VELOCIraptor config file...";
     GetParamFile(opt);
@@ -134,7 +134,7 @@ int InitVelociraptor(Options &opt, char* configname, unitinfo u, siminfo s, cons
 #endif
 
     //write velociraptor configuration info, appending .configuration to the input config file and writing every config option
-    opt.outname = configname;
+    opt.outname = const_cast<char*>(configname);
 
     //store list of names that
     WriteVELOCIraptorConfig(opt);
@@ -151,7 +151,7 @@ int InitVelociraptor(Options &opt, char* configname, unitinfo u, siminfo s, cons
 
 }
 
-int InitVelociraptor(char* configname, unitinfo u, siminfo s, const int numthreads)
+int InitVelociraptor(const char* configname, unitinfo u, siminfo s, const int numthreads)
 {
     return InitVelociraptor(libvelociraptorOpt, configname, u, s, numthreads);
 }
