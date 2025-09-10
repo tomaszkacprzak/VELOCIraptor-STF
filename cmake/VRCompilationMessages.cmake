@@ -71,7 +71,8 @@ macro(vr_compilation_summary)
         )
     vr_report("Simulation-specifics"
             "Used to run against simulations with a high resolution region" ZOOM_SIM
-            "Build library for integration into SWIFT Sim code " USE_SWIFT_INTERFACE)
+            "Build library for integration into SWIFT Sim code " USE_SWIFT_INTERFACE
+            "Build library for integration into PkdGrav3 Sim code" PKDGRAV3INTERFACE)
     vr_report("Others"
             "Calculate local density dist. only for particles in field objects" STRUCTURE_DEN
             "Like above, but use particles inside field objects only for calclation" HALO_DEN)

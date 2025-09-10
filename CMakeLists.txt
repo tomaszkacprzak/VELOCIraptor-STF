@@ -97,23 +97,33 @@ vr_option(USE_EXTRA_INPUT_INFO     "Store where particles are located in the inp
 vr_option(USE_EXTRA_FOF_INFO     "Store particles fof, group, SO ids" OFF)
 vr_option(USE_LARGE_KDTREE      "Require large mem KDTree as there are more than > max 32-bit integer entries" OFF)
 
+# Allow PKDGRAV3 interface flag without the VR_ prefix
+if (DEFINED PKDGRAV3INTERFACE AND NOT DEFINED VR_PKDGRAV3INTERFACE)
+    set(VR_PKDGRAV3INTERFACE ${PKDGRAV3INTERFACE} CACHE BOOL
+        "Used to compile the code with hooks for being called from the PKDGRAV3 N-body code" FORCE)
+endif()
+
 # VELOCiraptor behavior options
 vr_option(STRUCTURE_DEN "Calculate local density dist. only for particles in field objects; uses all particles to estimate quantity" ON)
 vr_option(HALO_DEN      "Like STRUCTURE_DEN, but se particles inside field objects" OFF)
 vr_option(ZOOM_SIM      "Used to run against simulations with a high resolution region" OFF)
 vr_option(USE_SWIFT_INTERFACE "Used to compile the code with hooks for being called from the SWIFT Hydro nbody code" OFF)
+vr_option(PKDGRAV3INTERFACE "Used to compile the code with hooks for being called from the PKDGRAV3 N-body code" OFF)
 vr_option(LOG_SOURCE_LOCATION "Append source code location to all logging statements" ON)
 
 
 # Let's true to our word
 if (VR_USE_SWIFT_INTERFACE)
-	set(NBODY_USE_SWIFT_INTERFACE ON)
+        set(NBODY_USE_SWIFT_INTERFACE ON)
+endif()
+if (VR_PKDGRAV3INTERFACE)
+        set(NBODY_USE_PKDGRAV3_INTERFACE ON)
 endif()
 if (VR_USE_HYDRO)
-	set(NBODY_USE_GAS ON)
-	set(NBODY_USE_STARS ON)
-	set(NBODY_USE_BH ON)
-	set(VR_USE_BH ON)
+        set(NBODY_USE_GAS ON)
+        set(NBODY_USE_STARS ON)
+        set(NBODY_USE_BH ON)
+        set(VR_USE_BH ON)
 	set(VR_USE_GAS ON)
 	set(VR_USE_STAR ON)
 endif()
@@ -201,6 +211,7 @@ vr_option_defines(ZOOM_SIM                  HIGHRES)
 vr_option_defines(USE_LARGE_KDTREE          LARGETREE)
 
 vr_option_defines(USE_SWIFT_INTERFACE       SWIFTINTERFACE)
+vr_option_defines(PKDGRAV3INTERFACE         PKDGRAV3INTERFACE)
 vr_option_defines(LOG_SOURCE_LOCATION       VR_LOG_SOURCE_LOCATION)
 
 if (VR_USE_SWIFT_INTERFACE)

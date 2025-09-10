@@ -56,14 +56,15 @@ set_target_properties(velociraptor PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_B
 
 # Bringing NBodyLib objects into the velociraptor library
 target_link_libraries(velociraptor PUBLIC nbodylib_iface)
+if (NOT VR_USE_SWIFT_INTERFACE AND NOT VR_PKDGRAV3INTERFACE)
+        add_executable(stf main.cxx)
+        target_link_libraries(stf velociraptor ${VR_LIBS})
 
-add_executable(stf main.cxx)
-target_link_libraries(stf velociraptor ${VR_LIBS})
-
-if (VR_LINK_FLAGS)
-	set_target_properties(stf PROPERTIES LINK_FLAGS ${VR_LINK_FLAGS})
+        if (VR_LINK_FLAGS)
+                set_target_properties(stf PROPERTIES LINK_FLAGS ${VR_LINK_FLAGS})
+        endif()
+        set_target_properties(stf PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 endif()
-set_target_properties(stf PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 sanitizer_options(velociraptor)
 
 if (BUILD_TESTING)
