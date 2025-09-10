@@ -22,7 +22,6 @@
 using namespace Swift;
 #elif defined(PKDGRAV3INTERFACE)
 #include "pkdgrav3interface.h"
-using namespace Pkdgrav3;
 #endif
 
 /// function that sends information between threads 

@@ -67,7 +67,9 @@ inline int ConfigCheckPkdgrav3(Options &opt, Pkdgrav3::siminfo &s)
     return 1;
 }
 
-int InitVelociraptor(Options &opt, const char* configname, unitinfo u, siminfo s, const int numthreads)
+int InitVelociraptor(Options &opt, const char* configname,
+                     Pkdgrav3::unitinfo u, Pkdgrav3::siminfo s,
+                     const int numthreads)
 {
     // if mpi invoked, init the velociraptor tasks and openmp threads
 #ifdef USEMPI
@@ -151,23 +153,27 @@ int InitVelociraptor(Options &opt, const char* configname, unitinfo u, siminfo s
 
 }
 
-int InitVelociraptor(const char* configname, unitinfo u, siminfo s, const int numthreads)
+int InitVelociraptor(const char* configname, Pkdgrav3::unitinfo u,
+                     Pkdgrav3::siminfo s, const int numthreads)
 {
     return InitVelociraptor(libvelociraptorOpt, configname, u, s, numthreads);
 }
 
-vr_return_data InvokeVelociraptor(const int snapnum, char* outputname,
-    cosmoinfo c, siminfo s,
-    const size_t num_gravity_parts, const size_t num_hydro_parts, const size_t num_star_parts,
+Pkdgrav3::vr_return_data InvokeVelociraptor(
+    const int snapnum, char* outputname, Pkdgrav3::cosmoinfo c,
+    Pkdgrav3::siminfo s, const size_t num_gravity_parts,
+    const size_t num_hydro_parts, const size_t num_star_parts,
     struct pkdgrav3_vel_part *pkdgrav_parts, int *cell_node_ids,
-    const int numthreads, const int ireturngroupinfoflag, const int ireturnmostbound)
+    const int numthreads, const int ireturngroupinfoflag,
+    const int ireturnmostbound)
 {
     std::cout << "hello world from velociraptor: InvokeVelociraptor" << std::endl;
-    vr_return_data data{};
+    Pkdgrav3::vr_return_data data{};
     return data;
 }
 
-void SetVelociraptorSimulationState(cosmoinfo c, siminfo s)
+void SetVelociraptorSimulationState(Pkdgrav3::cosmoinfo c,
+                                    Pkdgrav3::siminfo s)
 {
     std::cout << "hello world from velociraptor: SetVelociraptorSimulationState" << std::endl;
 }
