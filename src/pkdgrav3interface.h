@@ -10,8 +10,9 @@
  
  #ifdef PKDGRAV3INTERFACE
  
- Options* make_default_options();
- void destroy_options(Options* p);
+ Options* pkdgrav3_make_default_options();
+ void pkdgrav3_destroy_options(Options* opt);
+ void pkdgrav3_load_options(const char* filename, Options &opt);
  
  #endif
  

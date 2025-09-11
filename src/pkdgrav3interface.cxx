@@ -6,14 +6,20 @@
 
  #ifdef PKDGRAV3INTERFACE
  
- Options* make_default_options() {
+ Options* pkdgrav3_make_default_options() {
      // Safe for both aggregates and ctor-based types
-     auto* o = new Options{};      // value-initialize
-     return o;
+     auto* opt = new Options{};      // value-initialize
+     return opt;
  }
  
- void destroy_options(Options* p) {
-     delete p; // legal here: we see the complete type
+ void pkdgrav3_destroy_options(Options* opt) {
+     delete opt; // legal here: we see the complete type
+ }
+ 
+ void pkdgrav3_load_options(const char* filename, Options &opt) {
+     
+     opt.pname = const_cast<char*>(filename); 
+     fprintf(stdout, "Velociraptor Options->pname: %s\n", opt.pname);
  }
  
  #endif
