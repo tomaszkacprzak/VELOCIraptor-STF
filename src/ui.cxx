@@ -2364,7 +2364,9 @@ void ConfigCheck(Options &opt)
     //store the git hash
     opt.git_sha1 = velociraptor::git_sha1();
 #ifdef USEMPI
+#ifndef PKDGRAV3INTERFACE
     MPI_Barrier(MPI_COMM_WORLD);
+#endif
 #endif
 }
 

@@ -63,12 +63,11 @@ void pkdgrav3_destroy_options(Options* opt) {
     delete opt; // legal here: we see the complete type
 }
 
-int pkdgrav3_load_options(const char* filename, Options &opt, const int numthreads) {
+int pkdgrav3_load_options(const char* filename, Options &opt, const int numthreads, const double box_size, const int num_total_particles) {
 
     opt.pname = const_cast<char*>(filename); 
     opt.outname = strdup("test.vr");
     fprintf(stdout, "Velociraptor Options->pname: %s  numthreads: %d\n", opt.pname, numthreads);
-
 
     // following swiftinterface.cxx
 
@@ -103,23 +102,26 @@ int pkdgrav3_load_options(const char* filename, Options &opt, const int numthrea
     opt.impiusemesh = false;
 
     // for now only dark matter is supported
-    int igas = 0;
-    int istar = 0;
-    int idarkmatter = 1;
+    int igas=0;
+    int istar=0;
+    int idarkmatter=1;
     iconfigflag = ConfigCheckPkdgrav3(opt, idarkmatter, igas, istar);
     if (iconfigflag != 1) return iconfigflag;
 
     LOG_RANK0(info) << "Setting cosmological parameters";
 
-    opt.lengthtokpc=1000.0;
-    opt.velocitytokms=1.0;
-    opt.masstosolarmass=1.0e10;
-    opt.icomoveunit=1;
-    opt.lengthinputconversion=1.0;
-    opt.massinputconversion=1.0;
-    opt.velocityinputconversion=1.0;
     opt.icosmologicalin = 1;
+    opt.lengthtokpc=1000.0; // output in Gpc
+    opt.velocitytokms=1.0;  // output in km/s
+    opt.masstosolarmass=1.0e10; // output in 1e10 Msun
+    opt.icomoveunit=1;
 
+    // unit conversion
+    // https://pkdgrav3.readthedocs.io/en/latest/units.html
+    opt.lengthinputconversion=box_size;
+    opt.massinputconversion=pow(box_size, 3) * 2.77536627208 * 1.0e11 / (double)num_total_particles; // in pkdgrav3, "mass" listed in the units docs is total mass of the box, so we need to divide by the number of particles
+    opt.velocityinputconversion=box_size * sqrt(8.0/3.0*M_PI) / (box_size * 100.0); // needs to be divided by scale factor a later
+    
     // cosmological parameters
     opt.G=1.0;
     opt.H=1.0;
@@ -136,7 +138,7 @@ int pkdgrav3_load_options(const char* filename, Options &opt, const int numthrea
     opt.MassValue = 1.0;
     NOMASSCheck(opt);
     
-    WriteVELOCIraptorConfig(opt);
+    // WriteVELOCIraptorConfig(opt);
 
 // #ifdef USEMPI
 //     //initialize the mpi write communicator to comm world;
