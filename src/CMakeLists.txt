@@ -46,6 +46,10 @@ set(VR_SOURCES
     vr_exceptions.cxx
 )
 
+if (VR_USE_PKDGRAV3_INTERFACE)
+    list(APPEND VR_SOURCES pkdgrav3interface.cxx)
+endif()
+
 add_library(velociraptor STATIC ${VR_SOURCES})
 target_compile_definitions(velociraptor PUBLIC ${VR_DEFINES})
 if (VR_CXX_FLAGS)
