@@ -24,6 +24,7 @@ void pkdgrav3_destroy_options(Options* opt) {
 void pkdgrav3_load_options(const char* filename, Options &opt, const int numthreads) {
 
     opt.pname = const_cast<char*>(filename); 
+    opt.outname = strdup("test.vr");
     fprintf(stdout, "Velociraptor Options->pname: %s  numthreads: %d\n", opt.pname, numthreads);
 
 
@@ -50,6 +51,58 @@ void pkdgrav3_load_options(const char* filename, Options &opt, const int numthre
 
     int iconfigflag;
 
+    GetParamFile(opt);
+
+    fprintf(stdout, "Velociraptor read config file\n");
+    fprintf(stdout, "Velociraptor opt.MinSize: %d\n", opt.MinSize);
+
+//     //on the fly finding and using swift's mesh mpi decomposition
+//     opt.iontheflyfinding = true;
+//     opt.impiusemesh = true;
+
+//     LOG_RANK0(info) << "Setting cosmology, units, sim stuff";
+//     ///set units, here idea is to convert internal units so that have kpc, km/s, solar mass
+//     ///\todo switch this so run in reasonable swift units and store conversion
+//     opt.lengthtokpc=u.lengthtokpc;
+//     opt.velocitytokms=u.velocitytokms;
+//     opt.masstosolarmass=u.masstosolarmass;
+
+//     //run in swift internal units, don't convert units
+//     opt.lengthinputconversion=1.0;
+//     opt.massinputconversion=1.0;
+//     opt.velocityinputconversion=1.0;
+//     opt.energyinputconversion=1.0;
+//     opt.SFRinputconversion=1.0;
+//     opt.metallicityinputconversion=1.0;
+//     opt.istellaragescalefactor = 1;
+
+//     //set cosmological parameters that do not change
+//     ///these should be in units of kpc, km/s, and solar mass
+//     opt.G=u.gravity;
+//     opt.H=u.hubbleunit;
+
+//     //set if cosmological
+//     opt.icosmologicalin = s.icosmologicalsim;
+
+//     //store a general mass unit, useful if running uniform box with single mass
+//     //and saving memory by not storing mass per particle.
+// #ifdef NOMASS
+//     opt.MassValue = s.mass_uniform_box;
+//     NOMASSCheck(opt);
+// #endif
+
+//     //write velociraptor configuration info, appending .configuration to the input config file and writing every config option
+//     opt.outname = configname;
+
+//     //store list of names that
+//     WriteVELOCIraptorConfig(opt);
+
+// #ifdef USEMPI
+//     //initialize the mpi write communicator to comm world;
+//     MPIInitWriteComm();
+// #endif
+
+//     LOG_RANK0(info) << "Finished initialising VELOCIraptor";
 
 
 }
