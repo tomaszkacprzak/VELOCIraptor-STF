@@ -9,7 +9,49 @@
 
 #ifdef PKDGRAV3INTERFACE
 
+/// \defgroup PKDGRAV3CONFIGERRORS Errors for pkdgrav3
+//@{
+///
+#define PKDGRAV3CONFIGOPTMISSING 8
+#define PKDGRAV3CONFIGOPTERROR 9
+#define PKDGRAV3CONFIGOPTCONFLICT 10
+//@}
 
+///check configuration options with swift
+inline int ConfigCheckPkdgrav3(Options &opt, int idarkmatter, int igas, int istar)
+{
+    if (opt.iBaryonSearch && !(opt.partsearchtype==PSTALL || opt.partsearchtype==PSTDARK)) {
+        LOG_RANK0(error) << "Conflict in config file: both gas/star/etc particle type search AND the separate baryonic (gas,star,etc) search flag are on. Check config";
+        return PKDGRAV3CONFIGOPTCONFLICT;
+    }
+    if (opt.iBoundHalos && opt.iKeepFOF) {
+        LOG_RANK0(error) << "Conflict in config file: Asking for Bound Field objects but also asking to keep the 3DFOF/then run 6DFOF. This is incompatible. Check config";
+        return PKDGRAV3CONFIGOPTCONFLICT;
+    }
+    if (opt.HaloMinSize==-1) opt.HaloMinSize=opt.MinSize;
+
+    if (idarkmatter == false && opt.partsearchtype==PSTDARK) {
+        LOG_RANK0(error) << "Conflict in config file: simulation contains no dark matter but searching only dark matter. This is incompatible. Check config";
+        return PKDGRAV3CONFIGOPTCONFLICT;
+    }
+    if (idarkmatter == false && opt.partsearchtype==PSTALL && opt.iBaryonSearch) {
+        LOG_RANK0(error) << "Conflict in config file: simulation contains no dark matter but using dark matter to define links when searching all particles . This is incompatible. Check config";
+        return PKDGRAV3CONFIGOPTCONFLICT;
+    }
+    if (igas == false && opt.partsearchtype==PSTGAS) {
+        LOG_RANK0(error) << "Conflict in config file: simulation contains no gas but searching only gas. This is incompatible. Check config";
+        return PKDGRAV3CONFIGOPTCONFLICT;
+    }
+    if ((istar == false && opt.partsearchtype==PSTSTAR)) {
+        LOG_RANK0(error) << "Conflict in config file: simulation contains no gas but searching only stars or using stars as basis for links. This is incompatible. Check config";
+        return PKDGRAV3CONFIGOPTCONFLICT;
+    }
+
+
+    //call the general ConfigCheck now
+    ConfigCheck(opt);
+    return 1;
+}
 
 Options* pkdgrav3_make_default_options() {
     // Safe for both aggregates and ctor-based types
@@ -21,7 +63,7 @@ void pkdgrav3_destroy_options(Options* opt) {
     delete opt; // legal here: we see the complete type
 }
 
-void pkdgrav3_load_options(const char* filename, Options &opt, const int numthreads) {
+int pkdgrav3_load_options(const char* filename, Options &opt, const int numthreads) {
 
     opt.pname = const_cast<char*>(filename); 
     opt.outname = strdup("test.vr");
@@ -56,46 +98,45 @@ void pkdgrav3_load_options(const char* filename, Options &opt, const int numthre
     fprintf(stdout, "Velociraptor read config file\n");
     fprintf(stdout, "Velociraptor opt.MinSize: %d\n", opt.MinSize);
 
-//     //on the fly finding and using swift's mesh mpi decomposition
-//     opt.iontheflyfinding = true;
-//     opt.impiusemesh = true;
+    //on the fly finding and using swift's mesh mpi decomposition
+    opt.iontheflyfinding = true;
+    opt.impiusemesh = false;
 
-//     LOG_RANK0(info) << "Setting cosmology, units, sim stuff";
-//     ///set units, here idea is to convert internal units so that have kpc, km/s, solar mass
-//     ///\todo switch this so run in reasonable swift units and store conversion
-//     opt.lengthtokpc=u.lengthtokpc;
-//     opt.velocitytokms=u.velocitytokms;
-//     opt.masstosolarmass=u.masstosolarmass;
+    // for now only dark matter is supported
+    int igas = 0;
+    int istar = 0;
+    int idarkmatter = 1;
+    iconfigflag = ConfigCheckPkdgrav3(opt, idarkmatter, igas, istar);
+    if (iconfigflag != 1) return iconfigflag;
 
-//     //run in swift internal units, don't convert units
-//     opt.lengthinputconversion=1.0;
-//     opt.massinputconversion=1.0;
-//     opt.velocityinputconversion=1.0;
-//     opt.energyinputconversion=1.0;
-//     opt.SFRinputconversion=1.0;
-//     opt.metallicityinputconversion=1.0;
-//     opt.istellaragescalefactor = 1;
+    LOG_RANK0(info) << "Setting cosmological parameters";
 
-//     //set cosmological parameters that do not change
-//     ///these should be in units of kpc, km/s, and solar mass
-//     opt.G=u.gravity;
-//     opt.H=u.hubbleunit;
+    opt.lengthtokpc=1000.0;
+    opt.velocitytokms=1.0;
+    opt.masstosolarmass=1.0e10;
+    opt.icomoveunit=1;
+    opt.lengthinputconversion=1.0;
+    opt.massinputconversion=1.0;
+    opt.velocityinputconversion=1.0;
+    opt.icosmologicalin = 1;
 
-//     //set if cosmological
-//     opt.icosmologicalin = s.icosmologicalsim;
-
-//     //store a general mass unit, useful if running uniform box with single mass
-//     //and saving memory by not storing mass per particle.
-// #ifdef NOMASS
-//     opt.MassValue = s.mass_uniform_box;
-//     NOMASSCheck(opt);
-// #endif
-
-//     //write velociraptor configuration info, appending .configuration to the input config file and writing every config option
-//     opt.outname = configname;
-
-//     //store list of names that
-//     WriteVELOCIraptorConfig(opt);
+    // cosmological parameters
+    opt.G=1.0;
+    opt.H=1.0;
+    opt.h=1.0;
+    opt.Omega_m=1.0;
+    opt.Omega_Lambda=1.0;
+    opt.Omega_de=1.0;
+    opt.Omega_k=1.0;
+    opt.Omega_cdm=1.0;
+    opt.Omega_b=1.0;
+    opt.Omega_r=1.0;
+    opt.Omega_nu=1.0;
+    opt.w_de=-1.0;
+    opt.MassValue = 1.0;
+    NOMASSCheck(opt);
+    
+    WriteVELOCIraptorConfig(opt);
 
 // #ifdef USEMPI
 //     //initialize the mpi write communicator to comm world;
@@ -103,6 +144,8 @@ void pkdgrav3_load_options(const char* filename, Options &opt, const int numthre
 // #endif
 
 //     LOG_RANK0(info) << "Finished initialising VELOCIraptor";
+
+    return iconfigflag;
 
 
 }

@@ -12,7 +12,7 @@
 
 Options* pkdgrav3_make_default_options();
 void pkdgrav3_destroy_options(Options* opt);
-void pkdgrav3_load_options(const char* filename, Options &opt, const int numthreads);
+int pkdgrav3_load_options(const char* filename, Options &opt, const int numthreads);
 
 #endif
 
