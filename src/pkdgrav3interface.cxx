@@ -53,20 +53,20 @@ inline int ConfigCheckPkdgrav3(Options &opt, int idarkmatter, int igas, int ista
     return 1;
 }
 
-Options* pkdgrav3_make_default_options() {
+Options* Pkdgrav3MakeDefaultOptions() {
     // Safe for both aggregates and ctor-based types
     auto* opt = new Options{};      // value-initialize
     return opt;
 }
 
-void pkdgrav3_destroy_options(Options* opt) {
+void Pkdgrav3DestroyOptions(Options* opt) {
     delete opt; // legal here: we see the complete type
 }
 
-int pkdgrav3_load_options(const char* filename, Options &opt, const int numthreads, const double box_size, const int num_total_particles) {
+int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_output, Options &opt, const int numthreads, const double box_size, const int num_total_particles) {
 
-    opt.pname = const_cast<char*>(filename); 
-    opt.outname = strdup("test.vr");
+    opt.pname = const_cast<char*>(filename_options); 
+    opt.outname = const_cast<char*>(filename_output);
     fprintf(stdout, "Velociraptor Options->pname: %s  numthreads: %d\n", opt.pname, numthreads);
 
     // following swiftinterface.cxx
@@ -150,6 +150,10 @@ int pkdgrav3_load_options(const char* filename, Options &opt, const int numthrea
     return iconfigflag;
 
 
+}
+
+int Pkdgrav3InvokeVelociraptor(Options* opt) {
+    return 0;
 }
 
 #endif

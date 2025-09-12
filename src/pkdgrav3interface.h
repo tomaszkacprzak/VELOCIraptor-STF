@@ -10,9 +10,10 @@
 
 #ifdef PKDGRAV3INTERFACE
 
-Options* pkdgrav3_make_default_options();
-void pkdgrav3_destroy_options(Options* opt);
-int pkdgrav3_load_options(const char* filename, Options &opt, const int numthreads, const double box_size, const int num_total_particles);
+Options* Pkdgrav3MakeDefaultOptions();
+void Pkdgrav3DestroyOptions(Options* opt);
+int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_output, Options &opt, const int numthreads, const double box_size, const int num_total_particles);
+int Pkdgrav3InvokeVelociraptor(Options* opt);
 
 #endif
 
