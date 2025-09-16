@@ -152,7 +152,17 @@ int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_outpu
 
 }
 
-int Pkdgrav3InvokeVelociraptor(Options* opt) {
+int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filename_output, const int iStep, const double box_size, const long num_total_particles, const int numthreads) {
+
+    
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+
+    int sum_rank = 0;
+    MPI_Allreduce(&rank, &sum_rank, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+   
+    fprintf(stdout, "Velociraptor rank %d sum_rank %d invoked with options: options %s output %s step %d numthreads %d box_size %f num_total_particles %ld\n", rank, sum_rank, filename_options, filename_output, iStep, numthreads, box_size, num_total_particles);
+
     return 0;
 }
 

@@ -10,10 +10,17 @@
 
 #ifdef PKDGRAV3INTERFACE
 
+// Forward declaration
+namespace NBody
+{
+class Particle;
+}
+
+
 Options* Pkdgrav3MakeDefaultOptions();
 void Pkdgrav3DestroyOptions(Options* opt);
 int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_output, Options &opt, const int numthreads, const double box_size, const int num_total_particles);
-int Pkdgrav3InvokeVelociraptor(Options* opt);
+int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filename_output, const int iStep, const double box_size, const long num_total_particles, const int numthreads);
 
 #endif
 

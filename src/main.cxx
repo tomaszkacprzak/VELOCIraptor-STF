@@ -619,6 +619,12 @@ int main(int argc, char *argv[])
         MPI_Finalize();
         exit(9);
     }
+
+    long int thread_id = pthread_self();
+    int comm_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD,&comm_rank);
+    fprintf(stdout, "Main: rank %3d, thread %ld\n", comm_rank, thread_id);
+
 #endif // USEOPENMP
 #endif // USEMPI
 
