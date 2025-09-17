@@ -171,6 +171,45 @@ int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filenam
     opt = Pkdgrav3MakeDefaultOptions();
     Pkdgrav3LoadOptions(filename_options, filename_output, *opt, numthreads, box_size, num_total_particles);
 
+    /*
+    Main Velociraptor interface code from swiftinterface.cxx InvokeVelociraptorHydro()
+    */
+
+    int NProcs=1;
+    int ThisTask=0;
+    MPI_Comm_size(MPI_COMM_WORLD,&NProcs);
+    MPI_Comm_rank(MPI_COMM_WORLD,&ThisTask);
+    omp_set_num_threads(numthreads);
+
+    Int_t Nlocal, Ntotal, Nmemlocal;
+    Int_t *pfof = NULL, *pfofall = NULL, *pfofbaryons = NULL, *numingroup = NULL, **pglist = NULL;
+    Int_t *nsub = NULL, *parentgid = NULL, *uparentgid =NULL, *stype = NULL;
+    Int_t ndark, index;
+    Int_t ngroup, nhalos;
+    //to store information about the group
+    PropData *pdata = NULL,*pdatahalos = NULL;
+    Nlocal = Nmemlocal = nExportParticleCount; // to fit the name convention
+    Ntotal = num_total_particles; // to fit the name convention
+
+    // Add memory padding for MPI
+    if(NProcs>1) {
+        Nmemlocal*=(1+opt->mpipartfac);
+        vExportParticles.resize(Nmemlocal);
+    }
+    
+    fprintf(stdout, "Velociraptor rank %d NProcs %d ThisTask %d Nlocal %d Ntotal %d Nmemlocal %d mpipartfac %f\n", rank, NProcs, ThisTask, Nlocal, Ntotal, Nmemlocal, opt->mpipartfac);
+
+    // Exchange particle counts
+    MPI_Allreduce(&Nlocal, &Ntotal, 1, MPI_Int_t, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allgather(&Nlocal, 1, MPI_Int_t, mpi_nlocal, 1, MPI_Int_t, MPI_COMM_WORLD);
+
+
+
+    /*
+    Cleanup
+    */
+    Pkdgrav3DestroyOptions(opt);
+
     return 0;
 }
 
