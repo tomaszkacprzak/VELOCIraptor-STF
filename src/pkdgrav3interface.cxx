@@ -2,11 +2,27 @@
  *  \brief this file contains stub routines that allow VELOCIraptor to interface with the pkdgrav3 N-body code.
  */
 
+ #include <algorithm>
+ #include <array>
+ #include <cassert>
+ #include <cmath>
+ #include <cstddef>
+ #include <iomanip>
+ #include <iostream>
+ #include <limits>
+ #include <numeric>
+ #include <string>
+ #include <tuple>
+ #include <utility>
+ #include <vector>
 #include "pkdgrav3interface.h"
 #include "ioutils.h"
 #include "logging.h"
 #include "timer.h"
 #include <cstdint>
+#include <iostream>
+#include <thread>   // for std::this_thread::sleep_for
+#include <chrono>   // for std::chrono::seconds
 
 #ifdef PKDGRAV3INTERFACE
 
@@ -17,6 +33,32 @@
 #define PKDGRAV3CONFIGOPTERROR 9
 #define PKDGRAV3CONFIGOPTCONFLICT 10
 //@}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ///check configuration options with swift
 inline int ConfigCheckPkdgrav3(Options &opt, int idarkmatter, int igas, int istar)
@@ -119,24 +161,24 @@ int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_outpu
 
     // unit conversion
     // https://pkdgrav3.readthedocs.io/en/latest/units.html
-    opt.lengthinputconversion=box_size;
-    opt.massinputconversion=pow(box_size, 3) * 2.77536627208 * 1.0e11 / (double)num_total_particles; // in pkdgrav3, "mass" listed in the units docs is total mass of the box, so we need to divide by the number of particles
-    opt.velocityinputconversion=box_size * sqrt(8.0/3.0*M_PI) / (box_size * 100.0); // needs to be divided by scale factor a later
+    // opt.lengthinputconversion=box_size;
+    // opt.massinputconversion=pow(box_size, 3) * 2.77536627208 * 1.0e11 / (double)num_total_particles; // in pkdgrav3, "mass" listed in the units docs is total mass of the box, so we need to divide by the number of particles
+    // opt.velocityinputconversion=box_size * sqrt(8.0/3.0*M_PI) / (box_size * 100.0); // needs to be divided by scale factor a later
     
     // cosmological parameters
-    opt.G=1.0;
-    opt.H=1.0;
-    opt.h=1.0;
-    opt.Omega_m=1.0;
-    opt.Omega_Lambda=1.0;
-    opt.Omega_de=1.0;
-    opt.Omega_k=1.0;
-    opt.Omega_cdm=1.0;
-    opt.Omega_b=1.0;
-    opt.Omega_r=1.0;
-    opt.Omega_nu=1.0;
+    opt.G=0.67430e-10;
+    opt.H=0.7;
+    opt.h=0.7;
+    opt.Omega_m=0.3;
+    opt.Omega_Lambda=0.7;
+    opt.Omega_de=0.7;
+    opt.Omega_k=0.0;
+    opt.Omega_cdm=0.25;
+    opt.Omega_b=0.05;
+    opt.Omega_r=0.0;
+    opt.Omega_nu=0.0;
     opt.w_de=-1.0;
-    opt.MassValue = 1.0;
+    opt.MassValue = 1.0e10;
     NOMASSCheck(opt);
     
     // WriteVELOCIraptorConfig(opt);
@@ -153,7 +195,7 @@ int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_outpu
 
 }
 
-int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filename_output, const int iStep, const double dScaleFactor, const double box_size, const long num_total_particles, std::vector<NBody::Particle> &vExportParticles, unsigned int &nExportParticleCount, const int numthreads) {
+int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filename_output, const int iStep, const double dScaleFactor, const double box_size, const double dHubbleParam, const long num_total_particles, std::vector<NBody::Particle> &vExportParticles, unsigned int &nExportParticleCount, const int numthreads) {
 
     
     int rank;
@@ -187,7 +229,7 @@ int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filenam
     Int_t ndark, index;
     Int_t ngroup, nhalos;
     //to store information about the group
-    PropData *pdata = NULL,*pdatahalos = NULL;
+    PropData *pdata = NULL, *pdatahalos = NULL;
     Nlocal = Nmemlocal = nExportParticleCount; // to fit the name convention
     Ntotal = num_total_particles; // to fit the name convention
 
@@ -203,14 +245,140 @@ int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filenam
     MPI_Allreduce(&Nlocal, &Ntotal, 1, MPI_Int_t, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allgather(&Nlocal, 1, MPI_Int_t, mpi_nlocal, 1, MPI_Int_t, MPI_COMM_WORLD);
 
+    LOG(info) << "Rank " << rank 
+              << " there are " << Nlocal 
+              << " particles and have allocated enough memory for " << Nmemlocal 
+              << " requiring "<< vr::memory_amount(Nmemlocal * sizeof(Particle));
 
+    LOG(info) << "Will also require additional memory for FOF algorithms and substructure search. "
+              << "Largest mem needed for preliminary FOF search. "
+              << "Rough estimate is " << vr::memory_amount(Nlocal * (sizeof(Int_tree_t) * 8));
+
+    MEMORY_USAGE_REPORT(info);
+
+    /*
+    Domain decomposition
+    */
+
+    // get the bounds of the domain using simple double arrays
+    double local_bounds[3][2];
+    std::vector<double[3][2]> all_bounds(NProcs);
+
+    for (int i = 0; i < 3; i++) {
+        local_bounds[i][0] =  dScaleFactor/2.0;
+        local_bounds[i][1] = -dScaleFactor/2.0;
+        for (int j = 0; j < nExportParticleCount; j++) {
+            
+            auto pos = vExportParticles[j].GetPosition();
+            if (pos[i] < local_bounds[i][0]) {
+                local_bounds[i][0] = pos[i];
+            }
+            if (pos[i] > local_bounds[i][1]) {
+                local_bounds[i][1] = pos[i];
+            }
+            
+        }
+        fprintf(stdout, "Velociraptor rank %d dim %d min_pos % 4.8f max_pos % 4.8f\n", rank, i, local_bounds[i][0], local_bounds[i][1]);
+    }
+
+    // gather the bounds of the domain to all ranks
+    MPI_Allgather(&local_bounds, 6, MPI_DOUBLE,      // send one value
+        all_bounds.data(), 6, MPI_DOUBLE,   // receive one value from each rank
+        MPI_COMM_WORLD);
+
+    // write to the mpi_domain struct
+    mpi_domain = new MPI_Domain[NProcs];
+    for (int i = 0; i < NProcs; i++) {
+        for (int j = 0; j < 3; j++){
+            for (int k = 0; k < 2; k++){
+                mpi_domain[i].bnd[j][k] = all_bounds[i][j][k];
+            }
+        }
+    }
+    //TODO: make boundaries consistent between all ranks
+
+
+    /*
+    Perform FOF search
+    */
+    fprintf(stdout, "Velociraptor rank %d performing FOF search\n", rank);
+    // std::this_thread::sleep_for(std::chrono::seconds(10));
+    pfof=SearchFullSet(*opt, Nlocal, vExportParticles, ngroup);
+    
+    
+    // LOG(info) << "Rank " << rank 
+    //           << " FOF search with " << Nlocal 
+    //           << " particles and " << numthreads
+    //           << " ngroup " << ngroup;
+
+    /*
+    Substructure search
+    */
+    // if (opt->iSubSearch) {
+    //     LOG(info) << "Searching subset";
+    //     //if groups have been found (and localized to single MPI thread) then proceed to search for subsubstructures
+    //     SearchSubSub(*opt, Nlocal, vExportParticles, pfof, ngroup, nhalos, pdatahalos);
+    //     LOG(info) << "Search for substructures " << Nlocal 
+    //               << " with " << numthreads
+    //               << " threads finished in " << timer;
+    // }
+    // pdata=new PropData[ngroup+1];
+    // //if inclusive halo mass required
+    // if (opt->iInclusiveHalo>0 && opt->iInclusiveHalo<3 && ngroup>0) {
+    //     CopyMasses(*opt, nhalos, pdatahalos, pdata);
+    //     delete[] pdatahalos;
+    // }
+
+    // /*
+    // get mpi local hierarchy
+    // */
+    // nsub=new Int_t[ngroup+1];
+    // parentgid=new Int_t[ngroup+1];
+    // uparentgid=new Int_t[ngroup+1];
+    // stype=new Int_t[ngroup+1];
+    // Int_t nhierarchy=GetHierarchy(*opt, ngroup, nsub, parentgid, uparentgid, stype);
+    // CopyHierarchy(*opt, pdata, ngroup, nsub, parentgid, uparentgid, stype);
+
+    // /*
+    // Calculate data and output
+    // */
+    // numingroup=BuildNumInGroup(Nlocal, ngroup, pfof);
+    // pglist=SortAccordingtoBindingEnergy(*opt, Nlocal, vExportParticles.data(), ngroup, pfof, numingroup, pdata);//alters pglist so most bound particles first
+    // WriteProperties(*opt, ngroup, pdata);
+    // WriteGroupCatalog(*opt, ngroup, numingroup, pglist, vExportParticles);
+
+    // if (ireturngroupinfoflag != 1 ) WriteSwiftExtendedOutput (*opt, ngroup, numingroup, pglist, vExportParticles);
+    // LOG(info) << "Wrote all data ";
+    
+
+    // Skipping most bound particle calculation
 
     /*
     Cleanup
     */
+    delete[] pfof;
+    delete[] pdata;
+    delete[] nsub;
+    delete[] uparentgid;
+    delete[] parentgid;
+    delete[] stype;
+    delete psldata;
     Pkdgrav3DestroyOptions(opt);
+
+    MEMORY_USAGE_REPORT(info);
 
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 #endif
