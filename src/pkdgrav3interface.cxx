@@ -217,13 +217,10 @@ int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filenam
     Main Velociraptor interface code from swiftinterface.cxx InvokeVelociraptorHydro()
     */
 
-    int NProcs=1;
-    int ThisTask=0;
     MPI_Comm_size(MPI_COMM_WORLD,&NProcs);
     MPI_Comm_rank(MPI_COMM_WORLD,&ThisTask);
     omp_set_num_threads(numthreads);
 
-    Int_t Nlocal, Ntotal, Nmemlocal;
     Int_t *pfof = NULL, *pfofall = NULL, *pfofbaryons = NULL, *numingroup = NULL, **pglist = NULL;
     Int_t *nsub = NULL, *parentgid = NULL, *uparentgid =NULL, *stype = NULL;
     Int_t ndark, index;
@@ -301,7 +298,7 @@ int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filenam
     /*
     Perform FOF search
     */
-    fprintf(stdout, "Velociraptor rank %d performing FOF search\n", rank);
+    fprintf(stdout, "Velociraptor rank %d performing FOF search Nlocal %d\n", rank, Nlocal);
     // std::this_thread::sleep_for(std::chrono::seconds(10));
     pfof=SearchFullSet(*opt, Nlocal, vExportParticles, ngroup);
     
