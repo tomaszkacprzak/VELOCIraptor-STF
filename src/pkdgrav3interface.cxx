@@ -6,6 +6,7 @@
 #include "ioutils.h"
 #include "logging.h"
 #include "timer.h"
+#include <cstdint>
 
 #ifdef PKDGRAV3INTERFACE
 
@@ -152,7 +153,7 @@ int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_outpu
 
 }
 
-int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filename_output, const int iStep, const double box_size, const long num_total_particles, const int numthreads) {
+int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filename_output, const int iStep, const double box_size, const long num_total_particles, std::vector<NBody::Particle> &vExportParticles, unsigned int &nExportParticleCount, const int numthreads) {
 
     
     int rank;
@@ -161,7 +162,14 @@ int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filenam
     int sum_rank = 0;
     MPI_Allreduce(&rank, &sum_rank, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
    
-    fprintf(stdout, "Velociraptor rank %d sum_rank %d invoked with options: options %s output %s step %d numthreads %d box_size %f num_total_particles %ld\n", rank, sum_rank, filename_options, filename_output, iStep, numthreads, box_size, num_total_particles);
+    fprintf(stdout, "Velociraptor rank %d sum_rank %d invoked with options: options %s output %s step %d numthreads %d box_size %f nExportParticleCount %d num_total_particles %ld\n", rank, sum_rank, filename_options, filename_output, iStep, numthreads, box_size, nExportParticleCount, num_total_particles);
+
+    /*
+    Load Velociraptoroptions 
+    */
+    Options* opt;
+    opt = Pkdgrav3MakeDefaultOptions();
+    Pkdgrav3LoadOptions(filename_options, filename_output, *opt, numthreads, box_size, num_total_particles);
 
     return 0;
 }
