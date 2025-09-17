@@ -153,7 +153,7 @@ int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_outpu
 
 }
 
-int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filename_output, const int iStep, const double box_size, const long num_total_particles, std::vector<NBody::Particle> &vExportParticles, unsigned int &nExportParticleCount, const int numthreads) {
+int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filename_output, const int iStep, const double dScaleFactor, const double box_size, const long num_total_particles, std::vector<NBody::Particle> &vExportParticles, unsigned int &nExportParticleCount, const int numthreads) {
 
     
     int rank;
