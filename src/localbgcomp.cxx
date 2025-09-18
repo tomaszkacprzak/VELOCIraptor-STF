@@ -350,7 +350,7 @@ void DetermineDenVRatioDistribution(Options &opt,const Int_t nbodies, Particle *
     nfits=8;
     oldchi2=MAXVALUE;
     for (int i=0;i<nfits;i++) {
-        chi2=FitNonLinLS(fitfunc, difffuncs, nparams, params.data(), covar, nbins, xbin.data(), rbin.data(), &W,  1e-2, 0.95, fixp[i].data(),1,20);
+        chi2=FitNonLinLS(fitfunc, difffuncs, nparams, params.data(), covar, nbins, xbin.data(), rbin.data(), &W,  1e-2, 0.95, fixp[i].data(),1,100);
         int ifitfail=0;
         for (int j=0;j<nparams;j++) ifitfail+=std::isnan(params[j]);
         ifitfail+=(params[2]<=0);

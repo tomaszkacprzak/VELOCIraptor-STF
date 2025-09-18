@@ -51,15 +51,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
 ///check configuration options with swift
 inline int ConfigCheckPkdgrav3(Options &opt, int idarkmatter, int igas, int istar)
 {
@@ -106,11 +97,11 @@ void Pkdgrav3DestroyOptions(Options* opt) {
     delete opt; // legal here: we see the complete type
 }
 
-int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_output, Options &opt, const int numthreads, const double box_size, const int num_total_particles) {
+int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_output, Options &opt, const int numthreads, const double box_size, const int num_total_particles, const double dScaleFactor, const double dHubbleParam) {
 
     opt.pname = const_cast<char*>(filename_options); 
     opt.outname = const_cast<char*>(filename_output);
-    fprintf(stdout, "Velociraptor Options->pname: %s  numthreads: %d\n", opt.pname, numthreads);
+    fprintf(stdout, "Velociraptor Options->pname: %s Options->outname: %s numthreads: %d\n", opt.pname, opt.outname, numthreads);
 
     // following swiftinterface.cxx
 
@@ -127,6 +118,8 @@ int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_outpu
     MinNumMPI=2;
 
     omp_set_num_threads(numthreads);
+    int omp_num_threads = omp_get_max_threads();
+    fprintf(stdout, "Velociraptor omp_num_threads %d\n", omp_num_threads);
 
 
     // logging level is reset correctly later after reading the user configuration
@@ -154,7 +147,7 @@ int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_outpu
     LOG_RANK0(info) << "Setting cosmological parameters";
 
     opt.icosmologicalin = 1;
-    opt.lengthtokpc=1000.0; // output in Gpc
+    opt.lengthtokpc=1000.0; // output in Mpc
     opt.velocitytokms=1.0;  // output in km/s
     opt.masstosolarmass=1.0e10; // output in 1e10 Msun
     opt.icomoveunit=1;
@@ -164,11 +157,17 @@ int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_outpu
     // opt.lengthinputconversion=box_size;
     // opt.massinputconversion=pow(box_size, 3) * 2.77536627208 * 1.0e11 / (double)num_total_particles; // in pkdgrav3, "mass" listed in the units docs is total mass of the box, so we need to divide by the number of particles
     // opt.velocityinputconversion=box_size * sqrt(8.0/3.0*M_PI) / (box_size * 100.0); // needs to be divided by scale factor a later
-    
+
+    // simulation state
+    opt.a = dScaleFactor;
+    opt.p = box_size * dScaleFactor;
+    opt.ellxscale *= dScaleFactor;
+    opt.uinfo.eps *= dScaleFactor;
+
     // cosmological parameters
-    opt.G=0.67430e-10;
-    opt.H=0.7;
-    opt.h=0.7;
+    opt.G=-1.0; // set automatically in ConfigCheck
+    opt.H=100.0;
+    opt.h=dHubbleParam;
     opt.Omega_m=0.3;
     opt.Omega_Lambda=0.7;
     opt.Omega_de=0.7;
@@ -181,8 +180,6 @@ int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_outpu
     opt.MassValue = 1.0e10;
     NOMASSCheck(opt);
     
-    // WriteVELOCIraptorConfig(opt);
-
 // #ifdef USEMPI
 //     //initialize the mpi write communicator to comm world;
 //     MPIInitWriteComm();
@@ -197,7 +194,6 @@ int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_outpu
 
 int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filename_output, const int iStep, const double dScaleFactor, const double box_size, const double dHubbleParam, const long num_total_particles, std::vector<NBody::Particle> &vExportParticles, unsigned int &nExportParticleCount, const int numthreads) {
 
-    
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 
@@ -211,7 +207,7 @@ int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filenam
     */
     Options* opt;
     opt = Pkdgrav3MakeDefaultOptions();
-    Pkdgrav3LoadOptions(filename_options, filename_output, *opt, numthreads, box_size, num_total_particles);
+    Pkdgrav3LoadOptions(filename_options, filename_output, *opt, numthreads, box_size, num_total_particles, dScaleFactor, dHubbleParam);
 
     /*
     Main Velociraptor interface code from swiftinterface.cxx InvokeVelociraptorHydro()
@@ -300,52 +296,60 @@ int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filenam
     */
     fprintf(stdout, "Velociraptor rank %d performing FOF search Nlocal %d\n", rank, Nlocal);
     // std::this_thread::sleep_for(std::chrono::seconds(10));
+    ConfigCheck(*opt);
+    WriteVELOCIraptorConfig(*opt);
+
+    fprintf(stdout, "Velociraptor rank %d openmpfofsize %d iopenmpfof %d omp_get_max_threads %d\n", rank, opt->openmpfofsize, opt->iopenmpfof, omp_get_max_threads());
     pfof=SearchFullSet(*opt, Nlocal, vExportParticles, ngroup);
     
     
-    // LOG(info) << "Rank " << rank 
-    //           << " FOF search with " << Nlocal 
-    //           << " particles and " << numthreads
-    //           << " ngroup " << ngroup;
+    LOG(info) << "Rank " << rank 
+              << " FOF search with " << Nlocal 
+              << " particles and " << numthreads
+              << " ngroup " << ngroup;
 
     /*
     Substructure search
     */
-    // if (opt->iSubSearch) {
-    //     LOG(info) << "Searching subset";
-    //     //if groups have been found (and localized to single MPI thread) then proceed to search for subsubstructures
-    //     SearchSubSub(*opt, Nlocal, vExportParticles, pfof, ngroup, nhalos, pdatahalos);
-    //     LOG(info) << "Search for substructures " << Nlocal 
-    //               << " with " << numthreads
-    //               << " threads finished in " << timer;
-    // }
-    // pdata=new PropData[ngroup+1];
-    // //if inclusive halo mass required
-    // if (opt->iInclusiveHalo>0 && opt->iInclusiveHalo<3 && ngroup>0) {
-    //     CopyMasses(*opt, nhalos, pdatahalos, pdata);
-    //     delete[] pdatahalos;
-    // }
+    if (opt->iSubSearch) {
+        LOG(info) << "Searching subset";
+        //if groups have been found (and localized to single MPI thread) then proceed to search for subsubstructures
+        SearchSubSub(*opt, Nlocal, vExportParticles, pfof, ngroup, nhalos, pdatahalos);
+        LOG(info) << "Search for substructures " << Nlocal 
+                  << " with num_threads" << numthreads;
+    }
+    pdata=new PropData[ngroup+1];
+    //if inclusive halo mass required
+    
+    if (opt->iInclusiveHalo>0 && opt->iInclusiveHalo<3 && ngroup>0) {
+        fprintf(stdout, "Velociraptor: rank %d CopyMasses nhalos %d ngroup+1 %d\n", rank, nhalos, ngroup+1);
+        CopyMasses(*opt, nhalos, pdatahalos, pdata);
+        delete[] pdatahalos;
+    }
 
-    // /*
-    // get mpi local hierarchy
-    // */
-    // nsub=new Int_t[ngroup+1];
-    // parentgid=new Int_t[ngroup+1];
-    // uparentgid=new Int_t[ngroup+1];
-    // stype=new Int_t[ngroup+1];
-    // Int_t nhierarchy=GetHierarchy(*opt, ngroup, nsub, parentgid, uparentgid, stype);
-    // CopyHierarchy(*opt, pdata, ngroup, nsub, parentgid, uparentgid, stype);
+    /*
+    get mpi local hierarchy
+    */
+    fprintf(stdout, "Velociraptor: rank %d getting mpi local hierarchy ngroup %d\n", rank, ngroup);
+    nsub=new Int_t[ngroup+1];
+    parentgid=new Int_t[ngroup+1];
+    uparentgid=new Int_t[ngroup+1];
+    stype=new Int_t[ngroup+1];
+    Int_t nhierarchy=GetHierarchy(*opt, ngroup, nsub, parentgid, uparentgid, stype);
+    CopyHierarchy(*opt, pdata, ngroup, nsub, parentgid, uparentgid, stype);
 
-    // /*
-    // Calculate data and output
-    // */
-    // numingroup=BuildNumInGroup(Nlocal, ngroup, pfof);
-    // pglist=SortAccordingtoBindingEnergy(*opt, Nlocal, vExportParticles.data(), ngroup, pfof, numingroup, pdata);//alters pglist so most bound particles first
-    // WriteProperties(*opt, ngroup, pdata);
-    // WriteGroupCatalog(*opt, ngroup, numingroup, pglist, vExportParticles);
+    /*
+    Calculate data and output
+    */
+    fprintf(stdout, "Velociraptor: rank %d SortAccordingtoBindingEnergy ngroup %d\n", rank, ngroup);
+    numingroup=BuildNumInGroup(Nlocal, ngroup, pfof);
+    pglist=SortAccordingtoBindingEnergy(*opt, Nlocal, vExportParticles.data(), ngroup, pfof, numingroup, pdata);//alters pglist so most bound particles first
 
-    // if (ireturngroupinfoflag != 1 ) WriteSwiftExtendedOutput (*opt, ngroup, numingroup, pglist, vExportParticles);
-    // LOG(info) << "Wrote all data ";
+    fprintf(stdout, "Velociraptor: rank %d WriteProperties ngroup %d\n", rank, ngroup);
+    WriteProperties(*opt, ngroup, pdata);
+    WriteGroupCatalog(*opt, ngroup, numingroup, pglist, vExportParticles);
+
+    LOG(info) << "Wrote all data ";
     
 
     // Skipping most bound particle calculation

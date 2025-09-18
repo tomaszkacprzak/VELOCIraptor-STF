@@ -17,7 +17,8 @@ Options* Pkdgrav3MakeDefaultOptions();
 void Pkdgrav3DestroyOptions(Options* opt);
 
 int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_output, Options &opt, 
-                        const int numthreads, const double box_size, const int num_total_particles);
+                        const int numthreads, const double box_size, const int num_total_particles, 
+                        const double dScaleFactor, const double dHubbleParam);
 
 int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filename_output, const int iStep, 
                                const double dScaleFactor, const double box_size, const double dHubbleParam, 
