@@ -146,17 +146,12 @@ int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_outpu
 
     LOG_RANK0(info) << "Setting cosmological parameters";
 
+    // set units
     opt.icosmologicalin = 1;
     opt.lengthtokpc=1000.0; // output in Mpc
     opt.velocitytokms=1.0;  // output in km/s
     opt.masstosolarmass=1.0e10; // output in 1e10 Msun
     opt.icomoveunit=1;
-
-    // unit conversion
-    // https://pkdgrav3.readthedocs.io/en/latest/units.html
-    // opt.lengthinputconversion=box_size;
-    // opt.massinputconversion=pow(box_size, 3) * 2.77536627208 * 1.0e11 / (double)num_total_particles; // in pkdgrav3, "mass" listed in the units docs is total mass of the box, so we need to divide by the number of particles
-    // opt.velocityinputconversion=box_size * sqrt(8.0/3.0*M_PI) / (box_size * 100.0); // needs to be divided by scale factor a later
 
     // simulation state
     opt.a = dScaleFactor;
@@ -179,13 +174,15 @@ int Pkdgrav3LoadOptions(const char* filename_options, const char* filename_outpu
     opt.w_de=-1.0;
     opt.MassValue = 1.0e10;
     NOMASSCheck(opt);
-    
-// #ifdef USEMPI
-//     //initialize the mpi write communicator to comm world;
-//     MPIInitWriteComm();
-// #endif
 
-//     LOG_RANK0(info) << "Finished initialising VELOCIraptor";
+    if (opt.iInclusiveHalo > 0) LOG_RANK0(warning) << "Inclusive halo flag is on, will calculate S0 masses after substructures are found for field objects - this is very slow!";
+    
+#ifdef USEMPI
+    //initialize the mpi write communicator to comm world;
+    MPIInitWriteComm();
+#endif
+
+    LOG_RANK0(info) << "Finished initialising VELOCIraptor";
 
     return iconfigflag;
 
@@ -302,12 +299,39 @@ int Pkdgrav3InvokeVelociraptor(const char* filename_options, const char* filenam
     fprintf(stdout, "Velociraptor rank %d openmpfofsize %d iopenmpfof %d omp_get_max_threads %d\n", rank, opt->openmpfofsize, opt->iopenmpfof, omp_get_max_threads());
     pfof=SearchFullSet(*opt, Nlocal, vExportParticles, ngroup);
     
-    
     LOG(info) << "Rank " << rank 
               << " FOF search with " << Nlocal 
               << " particles and " << numthreads
               << " ngroup " << ngroup;
 
+    nhalos=ngroup;
+    //if caculating inclusive halo masses, then for simplicity, I assume halo id order NOT rearranged!
+    //this is not necessarily true if baryons are searched for separately.
+    if (opt->iInclusiveHalo>0 && opt->iInclusiveHalo<3) {
+        pdatahalos=new PropData[nhalos+1];
+        fprintf(stdout, "Velociraptor rank %d BuildNumInGroup nhalos %d\n", rank, nhalos);
+        Int_t *numinhalos=BuildNumInGroup(Nlocal, nhalos, pfof);
+        Int_t *sortvalhalos=new Int_t[Nlocal];
+        Int_t *originalID=new Int_t[Nlocal];
+        for (Int_t i=0;i<Nlocal;i++) {
+            sortvalhalos[i] = pfof[i]*(pfof[i]>0)+Nlocal*(pfof[i]==0);
+            originalID[i] = vExportParticles[i].GetID();
+            vExportParticles[i].SetID(i);
+        }
+        fprintf(stdout, "Velociraptor rank %d BuildNoffset nhalos %d numinhalos %d\n", rank, nhalos, numinhalos);
+        Int_t *noffsethalos=BuildNoffset(Nlocal, vExportParticles.data(), nhalos, numinhalos, sortvalhalos);
+        fprintf(stdout, "Velociraptor rank %d GetInclusiveMasses nhalos %d numinhalos %d\n", rank, nhalos, numinhalos);
+        GetInclusiveMasses(*opt, Nlocal, vExportParticles.data(), nhalos, pfof, numinhalos, pdatahalos, noffsethalos);
+        fprintf(stdout, "Velociraptor rank %d std::sort nhalos %d numinhalos %d\n", rank, nhalos, numinhalos);
+        std::sort(vExportParticles.data(), vExportParticles.data() + Nlocal, IDCompareVec);
+        delete[] numinhalos;
+        delete[] sortvalhalos;
+        delete[] noffsethalos;
+        for (Int_t i=0;i<Nlocal;i++) vExportParticles[i].SetID(originalID[i]);
+        delete[] originalID;
+    }
+
+    
     /*
     Substructure search
     */
